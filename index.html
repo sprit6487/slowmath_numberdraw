@@ -177,7 +177,7 @@
                     <div class="m-name">점선 따라쓰기</div>
                 </div>
                 <div class="mode-card" data-mode="free">
-                    <div class="m-icon"><svg width="42" height="42" viewBox="0 0 42 42"><text x="21" y="24" fill="rgba(200,192,180,.3)" font-size="26" font-weight="bold" text-anchor="middle" dominant-baseline="middle">2</text><path d="M12 14 Q18 10 22 18 Q26 28 32 22" stroke="#5BC886" stroke-width="2.5" fill="none" stroke-linecap="round"/></svg></div>
+                    <div class="m-icon"><svg width="42" height="42" viewBox="0 0 42 42"><rect x="6" y="6" width="30" height="30" rx="3" fill="white" stroke="rgba(200,192,180,.3)" stroke-width="1.5"/><path d="M12 14 Q18 10 22 18 Q26 28 32 22" stroke="#5BC886" stroke-width="2.5" fill="none" stroke-linecap="round"/></svg></div>
                     <div class="m-name">자유 쓰기</div>
                 </div>
             </div>
@@ -227,14 +227,13 @@
 // ══════════════════════════════════════════════════════════════
 const G = {
     mode: 'guide',   // guide | dotted | free
-    num: 1,
+    nums: [1],        // selected numbers (multi-select)
+    numIdx: 0,        // current index in nums array
+    num: 1,           // current number being drawn
     diff: 'easy',
     drawing: false,
-    over: false,
     pts: [],
-    strokes: [],       // completed strokes
-    currentStroke: 0,   // which stroke we're on
-    failed: false,
+    strokes: [],
 };
 
 const MODE_LBL = { guide: '가이드 영역', dotted: '점선 따라쓰기', free: '자유 쓰기' };
@@ -490,13 +489,22 @@ const ctx = gc.getContext('2d');
     }
 })();
 
-// Number selection
+// Number selection (multi-select toggle)
 document.getElementById('num-grid').addEventListener('click', e => {
     const card = e.target.closest('.num-card');
     if (!card) return;
-    document.querySelectorAll('.num-card').forEach(c => c.classList.remove('sel'));
-    card.classList.add('sel');
-    G.num = parseInt(card.dataset.num);
+    const num = parseInt(card.dataset.num);
+    if (card.classList.contains('sel')) {
+        // Deselect, but keep at least one selected
+        if (G.nums.length > 1) {
+            G.nums = G.nums.filter(n => n !== num);
+            card.classList.remove('sel');
+        }
+    } else {
+        G.nums.push(num);
+        G.nums.sort((a, b) => a - b);
+        card.classList.add('sel');
+    }
 });
 
 // Mode selection
@@ -521,6 +529,8 @@ document.getElementById('diff-row').addEventListener('click', e => {
 document.getElementById('start-btn').addEventListener('click', () => {
     homeView.classList.add('hidden');
     gameView.classList.remove('hidden');
+    G.numIdx = 0;
+    G.num = G.nums[0];
     document.getElementById('nav-title').textContent = '숫자 ' + G.num + ' - ' + MODE_LBL[G.mode];
     document.getElementById('diff-badge').textContent = DIFF_LBL[G.diff];
     requestAnimationFrame(() => {
@@ -608,13 +618,16 @@ function render() {
     ctx.stroke();
 
     if (G.mode === 'free') {
-        // Free mode: empty canvas, just show faint number as reference
-        ctx.fillStyle = 'rgba(200,192,180,0.13)';
-        ctx.font = 'bold ' + Math.floor(h * 0.7) + 'px "Noto Sans KR", sans-serif';
-        ctx.textAlign = 'center';
-        ctx.textBaseline = 'middle';
-        ctx.fillText(G.num, w / 2, h / 2);
+        // Free mode: completely empty canvas
     } else {
+        // Guide mode: show faint number as background reference
+        if (G.mode === 'guide') {
+            ctx.fillStyle = 'rgba(200,192,180,0.13)';
+            ctx.font = 'bold ' + Math.floor(h * 0.7) + 'px "Noto Sans KR", sans-serif';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText(G.num, w / 2, h / 2);
+        }
         // Draw all stroke guides simultaneously
         scaledStrokes.forEach(stroke => {
             if (G.mode === 'guide') {
@@ -836,14 +849,8 @@ function retry() {
 }
 
 function nextNum() {
-    if (G.num < 10) {
-        G.num++;
-    } else {
-        G.num = 1;
-    }
-    document.querySelectorAll('.num-card').forEach(c => {
-        c.classList.toggle('sel', parseInt(c.dataset.num) === G.num);
-    });
+    G.numIdx = (G.numIdx + 1) % G.nums.length;
+    G.num = G.nums[G.numIdx];
     document.getElementById('nav-title').textContent = '숫자 ' + G.num + ' - ' + MODE_LBL[G.mode];
     scaledStrokes = getScaledStrokes(G.num, LW, LH);
     resetGame();
