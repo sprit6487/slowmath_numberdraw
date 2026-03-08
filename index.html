@@ -55,10 +55,6 @@
         .num-card.sel { border-color: #2E7FD9; background: #EEF5FF; color: #2E7FD9; }
 
         /* ── Difficulty ── */
-        .row-btns { display: flex; gap: 8px; margin-bottom: 14px; }
-        .seg-btn { flex: 1; padding: 11px 0; border: 2.5px solid #E8E2DA; border-radius: 12px; background: white; font-family: 'Noto Sans KR', sans-serif; font-size: .875rem; font-weight: 700; color: #8C8070; cursor: pointer; transition: all .15s; }
-        .seg-btn:active { transform: scale(.97); }
-        .seg-btn.sel-green { border-color: #5BC886; background: #EDFAF2; color: #1A7A3A; }
 
         .start-btn { width: 100%; padding: 16px 0; border-radius: 16px; border: none; margin-top: 18px; background: #4A4035; color: white; font-family: 'Noto Sans KR', sans-serif; font-size: 1.1rem; font-weight: 700; cursor: pointer; box-shadow: 0 4px 16px rgba(74,64,53,.25); transition: transform .1s, box-shadow .1s; }
         .start-btn:active { transform: scale(.97); box-shadow: none; }
@@ -68,7 +64,6 @@
         .btn-back { width: 36px; height: 36px; border-radius: 10px; border: 2px solid #E8E2DA; background: white; display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 1.1rem; color: #8C8070; flex-shrink: 0; }
         .btn-back:active { background: #F5F1EB; }
         .nav-title { flex: 1; font-size: 1rem; font-weight: 700; color: #4A4035; }
-        .badge { font-size: .75rem; font-weight: 600; color: #8C8070; background: #F5F1EB; border-radius: 8px; padding: 4px 10px; }
 
         .canvas-wrap { border: 2.5px solid #E8E2DA; border-radius: 20px; overflow: hidden; margin-bottom: 14px; background: #FAFAF8; position: relative; }
         canvas { display: block; touch-action: none; }
@@ -170,31 +165,37 @@
             <div class="mode-grid" id="mode-grid">
                 <div class="mode-card sel" data-mode="guide">
                     <div class="m-icon"><svg width="54" height="54" viewBox="0 0 54 54">
-                        <path d="M13 18 Q13 10 20 8 L28 8 Q36 8 38 14 L38 18 Q38 24 33 29 L26 36 Q21 41 18 48 L18 49 L38 49" stroke="none" fill="rgba(91,200,134,.1)"/>
-                        <path d="M10 18 Q10 7 19 5 L29 5 Q38 5 41 13 L41 18 Q41 25 36 30 L28 38 Q23 43 20 49 L15 49" stroke="rgba(91,200,134,.4)" stroke-width="1.2" fill="none" stroke-dasharray="4 3"/>
-                        <path d="M16 18 Q16 12 22 10 L27 10 Q33 10 35 15 L35 18 Q35 23 31 28 L24 35 Q19 40 17 47 L21 49 L41 49" stroke="rgba(91,200,134,.4)" stroke-width="1.2" fill="none" stroke-dasharray="4 3"/>
-                        <path d="M13 18 Q13 10 20 8 L28 8 Q36 8 38 14 L38 18 Q38 24 33 29 L26 36 Q21 41 18 49 L38 49" stroke="rgba(110,90,70,.15)" stroke-width="1.5" fill="none" stroke-dasharray="5 5"/>
-                        <polygon points="38,14 34,11 34,17" fill="rgba(91,200,134,.55)"/>
-                        <polygon points="28,34 24,31 24,37" fill="rgba(91,200,134,.55)" transform="rotate(-40 28 34)"/>
+                        <!-- green corridor around "2" shape -->
+                        <path d="M15 17 C15 9 22 6 28 6 C34 6 40 9 40 17 C40 23 36 27 30 33 L22 41 L16 47 L40 47" stroke="rgba(91,200,134,.45)" stroke-width="8" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+                        <path d="M15 17 C15 9 22 6 28 6 C34 6 40 9 40 17 C40 23 36 27 30 33 L22 41 L16 47 L40 47" stroke="rgba(91,200,134,.12)" stroke-width="6" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+                        <!-- center dashed guide -->
+                        <path d="M15 17 C15 9 22 6 28 6 C34 6 40 9 40 17 C40 23 36 27 30 33 L22 41 L16 47 L40 47" stroke="rgba(100,85,70,.18)" stroke-width="1.5" fill="none" stroke-dasharray="4 4" stroke-linecap="round" stroke-linejoin="round"/>
+                        <!-- arrows -->
+                        <polygon points="38,12 34,9 34,15" fill="rgba(91,200,134,.7)"/>
+                        <polygon points="24,39 21,36 21,42" fill="rgba(91,200,134,.7)" transform="rotate(-42 24 39)"/>
                     </svg></div>
                     <div class="m-name">가이드 영역</div>
                 </div>
                 <div class="mode-card" data-mode="dotted">
                     <div class="m-icon"><svg width="54" height="54" viewBox="0 0 54 54">
-                        <path d="M13 18 Q13 10 20 8 L28 8 Q36 8 38 14 L38 18 Q38 24 33 29 L26 36 Q21 41 18 49 L38 49" stroke="rgba(74,64,53,.3)" stroke-width="5" fill="none" stroke-linecap="round" stroke-dasharray="2 8"/>
-                        <polygon points="38,14 34,11 34,17" fill="rgba(240,144,30,.55)"/>
-                        <polygon points="28,34 24,31 24,37" fill="rgba(240,144,30,.55)" transform="rotate(-40 28 34)"/>
-                        <polygon points="30,49 27,45.5 27,52.5" fill="rgba(240,144,30,.55)"/>
+                        <!-- dotted "2" shape -->
+                        <path d="M15 17 C15 9 22 6 28 6 C34 6 40 9 40 17 C40 23 36 27 30 33 L22 41 L16 47 L40 47" stroke="rgba(74,64,53,.35)" stroke-width="5" fill="none" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="2 7"/>
+                        <!-- arrows -->
+                        <polygon points="38,12 34,9 34,15" fill="rgba(240,144,30,.6)"/>
+                        <polygon points="24,39 21,36 21,42" fill="rgba(240,144,30,.6)" transform="rotate(-42 24 39)"/>
+                        <polygon points="32,47 29,43.5 29,50.5" fill="rgba(240,144,30,.6)"/>
                     </svg></div>
                     <div class="m-name">점선 따라쓰기</div>
                 </div>
                 <div class="mode-card" data-mode="free">
                     <div class="m-icon"><svg width="54" height="54" viewBox="0 0 54 54">
-                        <path d="M13 18 Q13 10 20 8 L28 8 Q36 8 38 14 L38 18 Q38 24 33 29 L26 36" stroke="#5BC886" stroke-width="3" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
-                        <g transform="translate(25 35) rotate(-50)">
-                            <rect x="-2" y="-13" width="4" height="13" rx=".7" fill="#F0901E"/>
-                            <polygon points="-2,0 2,0 0,4" fill="#4A4035"/>
-                            <rect x="-2" y="-13" width="4" height="2.5" rx=".7" fill="#E8E2DA"/>
+                        <!-- drawn "2" with pencil -->
+                        <path d="M15 17 C15 9 22 6 28 6 C34 6 40 9 40 17 C40 23 36 27 30 33 L24 39" stroke="#5BC886" stroke-width="3" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+                        <!-- pencil -->
+                        <g transform="translate(23.5 38.5) rotate(135)">
+                            <rect x="-1.8" y="0" width="3.6" height="14" rx=".8" fill="#F0901E"/>
+                            <polygon points="-1.8,14 1.8,14 0,18" fill="#4A4035"/>
+                            <rect x="-1.8" y="0" width="3.6" height="3" rx=".8" fill="#E8E2DA"/>
                         </g>
                     </svg></div>
                     <div class="m-name">자유쓰기</div>
@@ -203,13 +204,6 @@
 
             <label class="sec-label">숫자</label>
             <div class="num-grid" id="num-grid"></div>
-
-            <label class="sec-label">난이도</label>
-            <div class="row-btns" id="diff-row">
-                <button class="seg-btn sel-green" data-diff="easy">쉬움</button>
-                <button class="seg-btn" data-diff="normal">보통</button>
-                <button class="seg-btn" data-diff="hard">어려움</button>
-            </div>
 
             <button class="start-btn" id="start-btn">시작하기</button>
 
@@ -225,7 +219,6 @@
                     <svg width="18" height="18" viewBox="0 0 20 20" fill="none"><path d="M3 10L10 3L17 10M5 8.5V16H8.5V12H11.5V16H15V8.5" stroke="#8C8070" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
                 </button>
                 <div class="nav-title" id="nav-title">숫자 1</div>
-                <span class="badge" id="diff-badge">쉬움</span>
             </div>
 
             <div class="canvas-wrap" id="canvas-wrap">
@@ -249,15 +242,13 @@ const G = {
     nums: [1,2,3,4,5,6,7,8,9,10], // selected numbers (multi-select)
     numIdx: 0,        // current index in nums array
     num: 1,           // current number being drawn
-    diff: 'easy',
     drawing: false,
     pts: [],
     strokes: [],
 };
 
 const MODE_LBL = { guide: '가이드 영역', dotted: '점선 따라쓰기', free: '자유쓰기' };
-const DIFF_LBL = { easy: '쉬움', normal: '보통', hard: '어려움' };
-const TOL = { easy: 48, normal: 32, hard: 20 };
+const GUIDE_TOL = 32; // guide corridor tolerance (normal difficulty)
 
 // ══════════════════════════════════════════════════════════════
 // Number stroke definitions (normalized 0-1 coordinate system)
@@ -535,15 +526,6 @@ document.getElementById('mode-grid').addEventListener('click', e => {
     G.mode = card.dataset.mode;
 });
 
-// Difficulty
-document.getElementById('diff-row').addEventListener('click', e => {
-    const b = e.target.closest('.seg-btn');
-    if (!b) return;
-    document.querySelectorAll('#diff-row .seg-btn').forEach(x => x.classList.remove('sel-green'));
-    b.classList.add('sel-green');
-    G.diff = b.dataset.diff;
-});
-
 // Start
 document.getElementById('start-btn').addEventListener('click', () => {
     homeView.classList.add('hidden');
@@ -551,7 +533,6 @@ document.getElementById('start-btn').addEventListener('click', () => {
     G.numIdx = 0;
     G.num = G.nums[0];
     document.getElementById('nav-title').textContent = '숫자 ' + G.num + ' - ' + MODE_LBL[G.mode];
-    document.getElementById('diff-badge').textContent = DIFF_LBL[G.diff];
     requestAnimationFrame(() => {
         initCanvas();
         resetGame();
@@ -620,7 +601,7 @@ function offsetPath(path, d) {
 // ══════════════════════════════════════════════════════════════
 function render() {
     const w = LW, h = LH;
-    const tol = TOL[G.diff];
+    const tol = GUIDE_TOL;
     ctx.clearRect(0, 0, w, h);
 
     // Background
