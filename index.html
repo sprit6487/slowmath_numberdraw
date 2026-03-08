@@ -75,10 +75,10 @@
 
         .instr { text-align: center; font-size: .875rem; font-weight: 600; color: #B8AD9E; margin-bottom: 12px; min-height: 22px; }
         .action-btns { display: flex; gap: 10px; width: 100%; max-width: 320px; margin: 0 auto; }
-        .btn-retry { flex: 1.2; padding: 13px 0; border-radius: 12px; border: none; background: #4A4035; font-family: 'Noto Sans KR', sans-serif; font-size: .9rem; font-weight: 700; color: white; cursor: pointer; transition: transform .1s; box-shadow: 0 2px 8px rgba(74,64,53,.2); }
-        .btn-retry:active { transform: scale(.97); box-shadow: none; }
-        .btn-change { flex: 1; padding: 13px 0; border-radius: 12px; border: 2.5px solid #E8E2DA; background: white; font-family: 'Noto Sans KR', sans-serif; font-size: .9rem; font-weight: 700; color: #8C8070; cursor: pointer; transition: transform .1s; }
-        .btn-change:active { transform: scale(.97); }
+        .btn-retry { flex: 1; padding: 13px 0; border-radius: 12px; border: 2.5px solid #E8E2DA; background: white; font-family: 'Noto Sans KR', sans-serif; font-size: .9rem; font-weight: 700; color: #8C8070; cursor: pointer; transition: transform .1s; }
+        .btn-retry:active { transform: scale(.97); }
+        .btn-change { flex: 1.2; padding: 13px 0; border-radius: 12px; border: none; background: #F0901E; font-family: 'Noto Sans KR', sans-serif; font-size: .9rem; font-weight: 700; color: white; cursor: pointer; transition: transform .1s; box-shadow: 0 2px 8px rgba(240,144,30,.3); }
+        .btn-change:active { transform: scale(.97); box-shadow: none; }
         .res-btns { display: flex; gap: 10px; width: 100%; margin-top: 8px; max-width: 320px; }
 
         @keyframes popIn { 0%{transform:scale(.7);opacity:0} 60%{transform:scale(1.12);opacity:1} 100%{transform:scale(1);opacity:1} }
@@ -639,14 +639,6 @@ function render() {
     if (G.mode === 'free') {
         // Free mode: completely empty canvas
     } else {
-        // Guide mode: show faint number as background reference
-        if (G.mode === 'guide') {
-            ctx.fillStyle = 'rgba(200,192,180,0.13)';
-            ctx.font = 'bold ' + Math.floor(h * 0.7) + 'px "Noto Sans KR", sans-serif';
-            ctx.textAlign = 'center';
-            ctx.textBaseline = 'middle';
-            ctx.fillText(G.num, w / 2, h / 2);
-        }
         // Draw all stroke guides simultaneously
         scaledStrokes.forEach(stroke => {
             if (G.mode === 'guide') {
