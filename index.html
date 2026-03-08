@@ -206,11 +206,13 @@
                 </div>
                 <div class="mode-card" data-mode="free">
                     <div class="m-icon"><svg width="54" height="54" viewBox="0 0 54 54">
-                        <path d="M14 11 C20 5 30 5 37 8 C42 11 43 18 40 23 C38 26 33 28 27 28 C33 28 39 31 41 35 C43 40 41 46 36 49" stroke="#5BC886" stroke-width="3" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
-                        <g transform="translate(35 48.5) rotate(150)">
+                        <!-- 3 shape drawn partway -->
+                        <path d="M14 11 C20 5 30 5 37 8 C42 11 43 18 40 23 C38 26 33 28 27 28 C33 28 39 31 41 35" stroke="#5BC886" stroke-width="3" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+                        <!-- pencil tip at stroke end (41,35), angled along writing direction -->
+                        <g transform="translate(41 35) rotate(70)">
                             <rect x="-1.8" y="0" width="3.6" height="14" rx=".8" fill="#F0901E"/>
-                            <polygon points="-1.8,14 1.8,14 0,18" fill="#4A4035"/>
-                            <rect x="-1.8" y="0" width="3.6" height="3" rx=".8" fill="#E8E2DA"/>
+                            <polygon points="-1.8,0 1.8,0 0,-4" fill="#4A4035"/>
+                            <rect x="-1.8" y="11" width="3.6" height="3" rx=".8" fill="#E8E2DA"/>
                         </g>
                     </svg></div>
                     <div class="m-name">자유쓰기</div>
