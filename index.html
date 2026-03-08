@@ -399,9 +399,16 @@ const NUM_STROKES = {
 // ══════════════════════════════════════════════════════════════
 // Interpolate strokes for smoother paths
 // ══════════════════════════════════════════════════════════════
-function catmullRomSpline(points, numPts) {
-    // Generate smooth curve through control points using Catmull-Rom spline
+function isCollinear(a, b, c) {
+    // Check if 3 points are nearly collinear (cross product near zero)
+    const cross = Math.abs((b.x - a.x) * (c.y - a.y) - (b.y - a.y) * (c.x - a.x));
+    const len = Math.hypot(c.x - a.x, c.y - a.y);
+    return len < 0.001 || cross / len < 0.008;
+}
+
+function interpolateSmooth(points, numPts) {
     if (points.length < 2) return points;
+    // For 2 points, just linear
     if (points.length === 2) {
         const result = [];
         for (let i = 0; i <= numPts; i++) {
@@ -410,28 +417,52 @@ function catmullRomSpline(points, numPts) {
         }
         return result;
     }
-    // Pad with phantom points
-    const pts = [
+
+    // Classify each segment as straight or curved
+    function segIsStraight(idx) {
+        const prev = idx > 0 ? points[idx - 1] : null;
+        const cur = points[idx];
+        const next = points[idx + 1];
+        const next2 = idx + 2 < points.length ? points[idx + 2] : null;
+        if (prev && !isCollinear(prev, cur, next)) return false;
+        if (next2 && !isCollinear(cur, next, next2)) return false;
+        return true;
+    }
+
+    // Generate raw interpolated points per segment
+    const raw = [];
+    const ptsPerSeg = Math.max(6, Math.ceil(numPts / (points.length - 1)));
+
+    // Pad for Catmull-Rom
+    const padded = [
         { x: 2 * points[0].x - points[1].x, y: 2 * points[0].y - points[1].y },
         ...points,
         { x: 2 * points[points.length-1].x - points[points.length-2].x, y: 2 * points[points.length-1].y - points[points.length-2].y }
     ];
-    const segments = pts.length - 3;
-    const raw = [];
-    const ptsPerSeg = Math.max(4, Math.ceil(numPts / segments));
-    for (let s = 0; s < segments; s++) {
-        const p0 = pts[s], p1 = pts[s+1], p2 = pts[s+2], p3 = pts[s+3];
-        const steps = (s === segments - 1) ? ptsPerSeg : ptsPerSeg;
-        for (let i = 0; i <= steps; i++) {
-            if (s > 0 && i === 0) continue; // avoid duplicate
-            const t = i / steps;
-            const t2 = t * t, t3 = t2 * t;
-            raw.push({
-                x: 0.5 * ((2*p1.x) + (-p0.x+p2.x)*t + (2*p0.x-5*p1.x+4*p2.x-p3.x)*t2 + (-p0.x+3*p1.x-3*p2.x+p3.x)*t3),
-                y: 0.5 * ((2*p1.y) + (-p0.y+p2.y)*t + (2*p0.y-5*p1.y+4*p2.y-p3.y)*t2 + (-p0.y+3*p1.y-3*p2.y+p3.y)*t3)
-            });
+
+    for (let s = 0; s < points.length - 1; s++) {
+        const straight = segIsStraight(s);
+        for (let i = 0; i <= ptsPerSeg; i++) {
+            if (s > 0 && i === 0) continue;
+            const t = i / ptsPerSeg;
+            if (straight) {
+                // Linear interpolation for straight segments
+                raw.push({
+                    x: points[s].x + (points[s+1].x - points[s].x) * t,
+                    y: points[s].y + (points[s+1].y - points[s].y) * t
+                });
+            } else {
+                // Catmull-Rom for curved segments
+                const p0 = padded[s], p1 = padded[s+1], p2 = padded[s+2], p3 = padded[s+3];
+                const t2 = t * t, t3 = t2 * t;
+                raw.push({
+                    x: 0.5 * ((2*p1.x) + (-p0.x+p2.x)*t + (2*p0.x-5*p1.x+4*p2.x-p3.x)*t2 + (-p0.x+3*p1.x-3*p2.x+p3.x)*t3),
+                    y: 0.5 * ((2*p1.y) + (-p0.y+p2.y)*t + (2*p0.y-5*p1.y+4*p2.y-p3.y)*t2 + (-p0.y+3*p1.y-3*p2.y+p3.y)*t3)
+                });
+            }
         }
     }
+
     // Resample to uniform spacing
     let totalLen = 0;
     const segLens = [];
@@ -462,7 +493,7 @@ function getScaledStrokes(num, w, h) {
     const usableW = w - margin * 2;
     const usableH = h - margin * 2;
     return raw.map(stroke => {
-        const interp = catmullRomSpline(stroke, 200);
+        const interp = interpolateSmooth(stroke, 200);
         return interp.map(p => ({
             x: margin + p.x * usableW,
             y: margin + p.y * usableH
@@ -735,9 +766,9 @@ function renderGuideMode(stroke, tol) {
     renderDirectionArrows(stroke, 'rgba(91,200,134,.45)');
 }
 
-function renderDirectionArrows(stroke, color, offset) {
+function renderDirectionArrows(stroke, color, offset, count) {
     const off = offset || 0;
-    const arrowCount = 4;
+    const arrowCount = count || 4;
     const arrowStep = Math.floor(stroke.length / (arrowCount + 1));
     for (let i = 1; i <= arrowCount; i++) {
         const idx = Math.min(i * arrowStep, stroke.length - 2);
@@ -773,8 +804,8 @@ function renderDottedMode(stroke) {
     ctx.stroke();
     ctx.setLineDash([]);
 
-    // Direction arrows (offset to avoid overlapping dotted line)
-    renderDirectionArrows(stroke, 'rgba(240,144,30,.55)', -12);
+    // Direction arrows (offset to avoid overlapping, minimal count)
+    renderDirectionArrows(stroke, 'rgba(240,144,30,.55)', -12, 2);
 }
 
 
