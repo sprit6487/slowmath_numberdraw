@@ -76,6 +76,28 @@
         .btn-change:active { transform: scale(.97); box-shadow: none; }
         .res-btns { display: flex; gap: 10px; width: 100%; margin-top: 8px; max-width: 320px; }
 
+        /* ── Progress ── */
+        .progress-bar { display: flex; align-items: center; gap: 8px; margin-bottom: 14px; }
+        .progress-dots { display: flex; gap: 4px; flex: 1; }
+        .progress-dot { flex: 1; height: 6px; border-radius: 3px; background: #E8E2DA; transition: background .2s; }
+        .progress-dot.done { background: #5BC886; }
+        .progress-dot.current { background: #F0901E; }
+        .progress-label { font-size: .75rem; font-weight: 700; color: #8C8070; white-space: nowrap; }
+
+        /* ── Result View ── */
+        .result-header { text-align: center; margin-bottom: 20px; }
+        .result-header h2 { font-size: 1.25rem; font-weight: 900; color: #4A4035; margin: 0 0 4px; }
+        .result-header p { font-size: .85rem; color: #B8AD9E; margin: 0; }
+        .result-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; margin-bottom: 24px; }
+        .result-cell { border: 2px solid #E8E2DA; border-radius: 12px; overflow: hidden; background: #FAFAF8; position: relative; }
+        .result-cell img { width: 100%; display: block; }
+        .result-cell .result-label { position: absolute; top: 4px; left: 6px; font-size: .65rem; font-weight: 700; color: #B8AD9E; }
+        .result-actions { display: flex; gap: 10px; max-width: 320px; margin: 0 auto; }
+        .result-actions button { flex: 1; padding: 13px 0; border-radius: 12px; font-family: 'Noto Sans KR', sans-serif; font-size: .9rem; font-weight: 700; cursor: pointer; transition: transform .1s; }
+        .result-actions button:active { transform: scale(.97); }
+        .btn-home { border: 2.5px solid #E8E2DA; background: white; color: #8C8070; }
+        .btn-again { border: none; background: #F0901E; color: white; box-shadow: 0 2px 8px rgba(240,144,30,.3); }
+
         @keyframes popIn { 0%{transform:scale(.7);opacity:0} 60%{transform:scale(1.12);opacity:1} 100%{transform:scale(1);opacity:1} }
         @keyframes fadeUp { from{opacity:0;transform:translateY(8px)} to{opacity:1;transform:translateY(0)} }
         .pop-in { animation: popIn .35s ease-out; }
@@ -221,14 +243,32 @@
                 <div class="nav-title" id="nav-title">숫자 1</div>
             </div>
 
+            <div class="progress-bar" id="progress-bar">
+                <div class="progress-dots" id="progress-dots"></div>
+                <div class="progress-label" id="progress-label">1/10</div>
+            </div>
+
             <div class="canvas-wrap" id="canvas-wrap">
                 <canvas id="gc"></canvas>
             </div>
 
-            <div class="instr" id="instr">출발점에서 시작하여 숫자를 써보세요</div>
+            <div class="instr" id="instr"></div>
             <div class="action-btns">
                 <button class="btn-retry" onclick="retry()">다시 쓰기</button>
-                <button class="btn-change" onclick="nextNum()">다음 숫자</button>
+                <button class="btn-change" onclick="nextTurn()">다음 숫자</button>
+            </div>
+        </div>
+
+        <!-- Result View -->
+        <div id="result-view" class="hidden">
+            <div class="result-header">
+                <h2 id="result-title">연습 완료!</h2>
+                <p id="result-subtitle">10개의 숫자를 모두 써봤어요</p>
+            </div>
+            <div class="result-grid" id="result-grid"></div>
+            <div class="result-actions">
+                <button class="btn-home" onclick="goHome()">홈으로</button>
+                <button class="btn-again" onclick="startAgain()">다시 연습하기</button>
             </div>
         </div>
     </div>
@@ -237,6 +277,7 @@
 // ══════════════════════════════════════════════════════════════
 // State
 // ══════════════════════════════════════════════════════════════
+const TOTAL_TURNS = 10;
 const G = {
     mode: 'guide',   // guide | dotted | free
     nums: [1,2,3,4,5,6,7,8,9,10], // selected numbers (multi-select)
@@ -245,6 +286,8 @@ const G = {
     drawing: false,
     pts: [],
     strokes: [],
+    turn: 0,          // current turn (0-based)
+    history: [],      // [{num, dataURL}] saved results
 };
 
 const MODE_LBL = { guide: '가이드 영역', dotted: '점선 따라쓰기', free: '자유쓰기' };
@@ -343,22 +386,22 @@ const NUM_STROKES = {
         ]
     ],
     8: [
-        // Top circle
+        // Top circle (clockwise: center→right→up→left→center)
         [
             {x:0.5,y:0.48},
-            {x:0.38,y:0.44},{x:0.28,y:0.36},{x:0.26,y:0.26},
-            {x:0.28,y:0.18},{x:0.36,y:0.12},{x:0.44,y:0.1},
-            {x:0.56,y:0.1},{x:0.64,y:0.12},{x:0.72,y:0.18},
-            {x:0.74,y:0.26},{x:0.72,y:0.36},{x:0.62,y:0.44},
+            {x:0.62,y:0.44},{x:0.72,y:0.36},{x:0.74,y:0.26},
+            {x:0.72,y:0.18},{x:0.64,y:0.12},{x:0.56,y:0.1},
+            {x:0.44,y:0.1},{x:0.36,y:0.12},{x:0.28,y:0.18},
+            {x:0.26,y:0.26},{x:0.28,y:0.36},{x:0.38,y:0.44},
             {x:0.5,y:0.48}
         ],
-        // Bottom circle
+        // Bottom circle (counter-clockwise: center→right→down→left→center)
         [
             {x:0.5,y:0.48},
-            {x:0.38,y:0.52},{x:0.26,y:0.6},{x:0.22,y:0.7},
-            {x:0.24,y:0.8},{x:0.32,y:0.86},{x:0.42,y:0.9},
-            {x:0.58,y:0.9},{x:0.68,y:0.86},{x:0.76,y:0.8},
-            {x:0.78,y:0.7},{x:0.74,y:0.6},{x:0.62,y:0.52},
+            {x:0.62,y:0.52},{x:0.74,y:0.6},{x:0.78,y:0.7},
+            {x:0.76,y:0.8},{x:0.68,y:0.86},{x:0.58,y:0.9},
+            {x:0.42,y:0.9},{x:0.32,y:0.86},{x:0.24,y:0.8},
+            {x:0.22,y:0.7},{x:0.26,y:0.6},{x:0.38,y:0.52},
             {x:0.5,y:0.48}
         ]
     ],
@@ -514,6 +557,7 @@ function socialLogin(provider) {
 // ══════════════════════════════════════════════════════════════
 const homeView = document.getElementById('home-view');
 const gameView = document.getElementById('game-view');
+const resultView = document.getElementById('result-view');
 const canvasWrap = document.getElementById('canvas-wrap');
 const gc = document.getElementById('gc');
 const ctx = gc.getContext('2d');
@@ -558,11 +602,16 @@ document.getElementById('mode-grid').addEventListener('click', e => {
 });
 
 // Start
-document.getElementById('start-btn').addEventListener('click', () => {
+function startGame() {
     homeView.classList.add('hidden');
+    resultView.classList.add('hidden');
     gameView.classList.remove('hidden');
     G.numIdx = 0;
     G.num = G.nums[0];
+    G.turn = 0;
+    G.history = [];
+    buildProgressDots();
+    updateProgress();
     document.getElementById('nav-title').textContent = '숫자 ' + G.num + ' - ' + MODE_LBL[G.mode];
     requestAnimationFrame(() => {
         initCanvas();
@@ -570,7 +619,29 @@ document.getElementById('start-btn').addEventListener('click', () => {
         updateInstr();
         render();
     });
-});
+}
+
+function buildProgressDots() {
+    const container = document.getElementById('progress-dots');
+    container.innerHTML = '';
+    for (let i = 0; i < TOTAL_TURNS; i++) {
+        const dot = document.createElement('div');
+        dot.className = 'progress-dot';
+        container.appendChild(dot);
+    }
+}
+
+function updateProgress() {
+    const dots = document.querySelectorAll('.progress-dot');
+    dots.forEach((dot, i) => {
+        dot.className = 'progress-dot';
+        if (i < G.turn) dot.classList.add('done');
+        else if (i === G.turn) dot.classList.add('current');
+    });
+    document.getElementById('progress-label').textContent = (G.turn + 1) + '/' + TOTAL_TURNS;
+}
+
+document.getElementById('start-btn').addEventListener('click', startGame);
 
 // Back
 document.getElementById('btn-back').addEventListener('click', () => {
@@ -875,18 +946,119 @@ function retry() {
     render();
 }
 
-function nextNum() {
+function saveCurrentDrawing() {
+    // Render user strokes only on a clean canvas for snapshot
+    const tmpCanvas = document.createElement('canvas');
+    tmpCanvas.width = gc.width;
+    tmpCanvas.height = gc.height;
+    const tmpCtx = tmpCanvas.getContext('2d');
+    const dpr = window.devicePixelRatio || 1;
+    tmpCtx.scale(dpr, dpr);
+    tmpCtx.fillStyle = '#FAFAF8';
+    tmpCtx.fillRect(0, 0, LW, LH);
+    // Draw guide faintly
+    tmpCtx.globalAlpha = 0.3;
+    if (G.mode === 'guide') {
+        scaledStrokes.forEach(s => {
+            tmpCtx.beginPath();
+            drawSmoothPathOn(tmpCtx, s);
+            tmpCtx.strokeStyle = 'rgba(91,200,134,.3)';
+            tmpCtx.lineWidth = 1;
+            tmpCtx.setLineDash([4, 4]);
+            tmpCtx.stroke();
+            tmpCtx.setLineDash([]);
+        });
+    } else if (G.mode === 'dotted') {
+        scaledStrokes.forEach(s => {
+            tmpCtx.beginPath();
+            drawSmoothPathOn(tmpCtx, s);
+            tmpCtx.strokeStyle = 'rgba(74,64,53,.2)';
+            tmpCtx.lineWidth = 3;
+            tmpCtx.setLineDash([2, 7]);
+            tmpCtx.stroke();
+            tmpCtx.setLineDash([]);
+        });
+    }
+    tmpCtx.globalAlpha = 1;
+    // Draw user strokes
+    G.strokes.forEach(stroke => {
+        if (stroke.length > 1) {
+            tmpCtx.beginPath();
+            drawSmoothPathOn(tmpCtx, stroke);
+            tmpCtx.strokeStyle = '#5BC886';
+            tmpCtx.lineWidth = 5;
+            tmpCtx.lineCap = 'round';
+            tmpCtx.lineJoin = 'round';
+            tmpCtx.setLineDash([]);
+            tmpCtx.stroke();
+        }
+    });
+    return tmpCanvas.toDataURL('image/png');
+}
+
+function drawSmoothPathOn(c, points) {
+    if (points.length < 2) return;
+    c.moveTo(points[0].x, points[0].y);
+    if (points.length === 2) { c.lineTo(points[1].x, points[1].y); return; }
+    for (let i = 0; i < points.length - 1; i++) {
+        const xm = (points[i].x + points[i+1].x) / 2;
+        const ym = (points[i].y + points[i+1].y) / 2;
+        if (i === 0) c.lineTo(xm, ym);
+        else c.quadraticCurveTo(points[i].x, points[i].y, xm, ym);
+    }
+    c.lineTo(points[points.length-1].x, points[points.length-1].y);
+}
+
+function nextTurn() {
+    // Save current drawing
+    const dataURL = saveCurrentDrawing();
+    G.history.push({ num: G.num, dataURL: dataURL });
+    G.turn++;
+
+    if (G.turn >= TOTAL_TURNS) {
+        showResults();
+        return;
+    }
+
+    // Advance to next number
     G.numIdx = (G.numIdx + 1) % G.nums.length;
     G.num = G.nums[G.numIdx];
     document.getElementById('nav-title').textContent = '숫자 ' + G.num + ' - ' + MODE_LBL[G.mode];
     scaledStrokes = getScaledStrokes(G.num, LW, LH);
+    updateProgress();
     resetGame();
     updateInstr();
     render();
 }
 
+function showResults() {
+    gameView.classList.add('hidden');
+    resultView.classList.remove('hidden');
+    document.getElementById('result-title').textContent = '연습 완료!';
+    document.getElementById('result-subtitle').textContent = TOTAL_TURNS + '개의 숫자를 모두 써봤어요';
+    const grid = document.getElementById('result-grid');
+    grid.innerHTML = '';
+    G.history.forEach((item, i) => {
+        const cell = document.createElement('div');
+        cell.className = 'result-cell';
+        const label = document.createElement('div');
+        label.className = 'result-label';
+        label.textContent = item.num;
+        const img = document.createElement('img');
+        img.src = item.dataURL;
+        cell.appendChild(label);
+        cell.appendChild(img);
+        grid.appendChild(cell);
+    });
+}
+
+function startAgain() {
+    startGame();
+}
+
 function goHome() {
     gameView.classList.add('hidden');
+    resultView.classList.add('hidden');
     homeView.classList.remove('hidden');
 }
 </script>
