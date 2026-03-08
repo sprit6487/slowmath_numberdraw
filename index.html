@@ -1,0 +1,964 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>느린아이 숫자쓰기</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;600;700;900&display=swap');
+
+        *, *::before, *::after { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        body { font-family: 'Noto Sans KR', sans-serif; margin: 0; padding: 0; background: #F5F1EB; min-height: 100dvh; display: flex; justify-content: center; align-items: flex-start; user-select: none; }
+        .app { width: 100%; max-width: 480px; min-height: 100dvh; background: white; padding: 24px 20px; padding-top: max(24px, env(safe-area-inset-top)); padding-bottom: max(24px, env(safe-area-inset-bottom)); display: flex; flex-direction: column; }
+        @media (min-width: 768px) { body { align-items: center; padding: 32px; } .app { max-width: 560px; min-height: auto; border-radius: 32px; box-shadow: 0 8px 48px rgba(0,0,0,0.07), 0 1px 4px rgba(0,0,0,0.04); padding: 44px 40px; } }
+        .hidden { display: none !important; }
+
+        /* ── Login View ── */
+        .login-view { display: flex; flex-direction: column; align-items: center; justify-content: center; flex: 1; min-height: 100dvh; padding: 40px 20px; }
+        .login-logo-area { text-align: center; margin-bottom: 48px; }
+        .login-logo-area svg.turtle-logo { width: 120px; height: 100px; }
+        .login-logo-area h1 { font-size: 1.875rem; font-weight: 900; letter-spacing: -0.025em; margin: 8px 0 0; color: #4A4035; }
+        .title-blue { color: #2E7FD9; }
+        .title-orange { color: #F0901E; }
+        .login-subtitle { color: #B8AD9E; font-size: .9375rem; margin-top: 4px; }
+        .login-buttons { width: 100%; max-width: 320px; display: flex; flex-direction: column; gap: 12px; }
+        .login-btn { display: flex; align-items: center; justify-content: center; gap: 10px; width: 100%; padding: 14px 20px; border-radius: 12px; font-size: .9375rem; font-weight: 600; font-family: 'Noto Sans KR', sans-serif; border: none; cursor: pointer; transition: transform .1s; }
+        .login-btn:active { transform: scale(.97); }
+        .login-btn svg { flex-shrink: 0; }
+        .login-btn.kakao { background: #FEE500; color: #191919; }
+        .login-btn.naver { background: #03C75A; color: #FFF; }
+        .login-btn.google { background: #FFF; color: #444; border: 1.5px solid #DADCE0; }
+        .login-btn.facebook { background: #1877F2; color: #FFF; }
+
+        /* ── Home View ── */
+        .app-header { display: flex; flex-direction: column; align-items: center; text-align: center; margin-bottom: 28px; }
+        .app-header svg.turtle-logo { width: 80px; height: 67px; }
+        .app-header h1 { font-size: 1.5rem; font-weight: 900; letter-spacing: -0.025em; margin: 8px 0 0; line-height: 1.2; }
+        .logout-wrap { margin-top: auto; padding-top: 24px; text-align: center; }
+        .logout-btn { background: none; border: 1.5px solid #E8E2DA; border-radius: 8px; padding: 8px 24px; font-size: 0.8rem; font-weight: 600; color: #B8AD9E; cursor: pointer; font-family: 'Noto Sans KR', sans-serif; transition: background 0.15s; }
+        .logout-btn:hover { background: #F5F1EB; }
+
+        .sec-label { font-size: .875rem; font-weight: 700; color: #4A4035; margin: 0 0 10px; }
+
+        /* ── Mode Selection ── */
+        .mode-grid { display: grid; grid-template-columns: repeat(4,1fr); gap: 8px; margin-bottom: 18px; }
+        .mode-card { border: 2.5px solid #E8E2DA; border-radius: 16px; padding: 14px 6px 12px; background: white; cursor: pointer; text-align: center; transition: all .15s; }
+        .mode-card:active { transform: scale(.95); }
+        .mode-card.sel { border-color: #F0901E; background: #FFF8F0; }
+        .mode-card .m-icon { height: 42px; display: flex; align-items: center; justify-content: center; margin-bottom: 6px; font-size: 1.8rem; }
+        .mode-card .m-name { font-size: .8rem; font-weight: 700; color: #4A4035; }
+
+        /* ── Number Grid ── */
+        .num-grid { display: grid; grid-template-columns: repeat(5,1fr); gap: 8px; margin-bottom: 18px; }
+        .num-card { border: 2.5px solid #E8E2DA; border-radius: 14px; padding: 12px 4px; background: white; cursor: pointer; text-align: center; transition: all .15s; font-size: 1.5rem; font-weight: 900; color: #4A4035; }
+        .num-card:active { transform: scale(.95); }
+        .num-card.sel { border-color: #2E7FD9; background: #EEF5FF; color: #2E7FD9; }
+
+        /* ── Difficulty ── */
+        .row-btns { display: flex; gap: 8px; margin-bottom: 14px; }
+        .seg-btn { flex: 1; padding: 11px 0; border: 2.5px solid #E8E2DA; border-radius: 12px; background: white; font-family: 'Noto Sans KR', sans-serif; font-size: .875rem; font-weight: 700; color: #8C8070; cursor: pointer; transition: all .15s; }
+        .seg-btn:active { transform: scale(.97); }
+        .seg-btn.sel-green { border-color: #5BC886; background: #EDFAF2; color: #1A7A3A; }
+
+        .start-btn { width: 100%; padding: 16px 0; border-radius: 16px; border: none; margin-top: 18px; background: #4A4035; color: white; font-family: 'Noto Sans KR', sans-serif; font-size: 1.1rem; font-weight: 700; cursor: pointer; box-shadow: 0 4px 16px rgba(74,64,53,.25); transition: transform .1s, box-shadow .1s; }
+        .start-btn:active { transform: scale(.97); box-shadow: none; }
+
+        /* ── Game View ── */
+        .game-nav { display: flex; align-items: center; gap: 12px; margin-bottom: 18px; }
+        .btn-back { width: 36px; height: 36px; border-radius: 10px; border: 2px solid #E8E2DA; background: white; display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 1.1rem; color: #8C8070; flex-shrink: 0; }
+        .btn-back:active { background: #F5F1EB; }
+        .nav-title { flex: 1; font-size: 1rem; font-weight: 700; color: #4A4035; }
+        .badge { font-size: .75rem; font-weight: 600; color: #8C8070; background: #F5F1EB; border-radius: 8px; padding: 4px 10px; }
+
+        .canvas-wrap { border: 2.5px solid #E8E2DA; border-radius: 20px; overflow: hidden; margin-bottom: 14px; background: #FAFAF8; position: relative; }
+        canvas { display: block; touch-action: none; }
+
+        .instr { text-align: center; font-size: .875rem; font-weight: 600; color: #B8AD9E; margin-bottom: 12px; min-height: 22px; }
+        .action-btns { display: flex; gap: 10px; width: 100%; max-width: 320px; margin: 0 auto; }
+        .btn-retry { flex: 1.2; padding: 13px 0; border-radius: 12px; border: none; background: #4A4035; font-family: 'Noto Sans KR', sans-serif; font-size: .9rem; font-weight: 700; color: white; cursor: pointer; transition: transform .1s; box-shadow: 0 2px 8px rgba(74,64,53,.2); }
+        .btn-retry:active { transform: scale(.97); box-shadow: none; }
+        .btn-change { flex: 1; padding: 13px 0; border-radius: 12px; border: 2.5px solid #E8E2DA; background: white; font-family: 'Noto Sans KR', sans-serif; font-size: .9rem; font-weight: 700; color: #8C8070; cursor: pointer; transition: transform .1s; }
+        .btn-change:active { transform: scale(.97); }
+        .res-btns { display: flex; gap: 10px; width: 100%; margin-top: 8px; max-width: 320px; }
+
+        @keyframes popIn { 0%{transform:scale(.7);opacity:0} 60%{transform:scale(1.12);opacity:1} 100%{transform:scale(1);opacity:1} }
+        @keyframes fadeUp { from{opacity:0;transform:translateY(8px)} to{opacity:1;transform:translateY(0)} }
+        .pop-in { animation: popIn .35s ease-out; }
+        .fade-up { animation: fadeUp .3s ease-out; }
+    </style>
+</head>
+<body>
+    <div class="app">
+        <!-- Login View -->
+        <div id="login-view" class="login-view">
+            <div class="login-logo-area">
+                <svg class="turtle-logo" viewBox="0 0 120 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <ellipse cx="30" cy="72" rx="10" ry="6" fill="#F2DC8C" stroke="#3A9B6A" stroke-width="2" transform="rotate(-20 30 72)"/>
+                    <ellipse cx="78" cy="76" rx="10" ry="6" fill="#F2DC8C" stroke="#3A9B6A" stroke-width="2" transform="rotate(15 78 76)"/>
+                    <ellipse cx="28" cy="54" rx="9" ry="5.5" fill="#F2DC8C" stroke="#3A9B6A" stroke-width="2" transform="rotate(-10 28 54)"/>
+                    <path d="M18 60 L10 55" stroke="#F2DC8C" stroke-width="4" stroke-linecap="round"/>
+                    <ellipse cx="55" cy="58" rx="35" ry="20" fill="#F5E6C8" stroke="#3A9B6A" stroke-width="2"/>
+                    <ellipse cx="52" cy="42" rx="32" ry="28" fill="#7EDCAA" stroke="#3A9B6A" stroke-width="2.5"/>
+                    <path d="M52 18 L42 32 L42 48 L52 58 L62 48 L62 32 Z" fill="none" stroke="#3A9B6A" stroke-width="1.3" opacity=".35"/>
+                    <line x1="42" y1="32" x2="24" y2="38" stroke="#3A9B6A" stroke-width="1.3" opacity=".35"/>
+                    <line x1="62" y1="32" x2="80" y2="38" stroke="#3A9B6A" stroke-width="1.3" opacity=".35"/>
+                    <line x1="42" y1="48" x2="26" y2="56" stroke="#3A9B6A" stroke-width="1.3" opacity=".35"/>
+                    <line x1="62" y1="48" x2="78" y2="56" stroke="#3A9B6A" stroke-width="1.3" opacity=".35"/>
+                    <ellipse cx="42" cy="26" rx="6" ry="4" fill="white" opacity=".35" transform="rotate(-15 42 26)"/>
+                    <ellipse cx="62" cy="36" rx="4" ry="3" fill="white" opacity=".2"/>
+                    <ellipse cx="92" cy="40" rx="17" ry="15" fill="#F5E6C8" stroke="#3A9B6A" stroke-width="2.5"/>
+                    <ellipse cx="82" cy="72" rx="10" ry="6" fill="#F2DC8C" stroke="#3A9B6A" stroke-width="2" transform="rotate(10 82 72)"/>
+                    <circle cx="99" cy="35" r="4" fill="white" stroke="#3A9B6A" stroke-width="1.5"/>
+                    <circle cx="100" cy="34" r="2.5" fill="#3A9B6A"/>
+                    <circle cx="101" cy="33" r="1" fill="white"/>
+                    <circle cx="100" cy="44" r="3.5" fill="#F0A050" opacity=".4"/>
+                    <path d="M94 46 Q98 50 103 46" fill="none" stroke="#3A9B6A" stroke-width="1.5" stroke-linecap="round"/>
+                </svg>
+                <h1><span class="title-blue">느린</span><span class="title-orange">아이</span> 숫자쓰기</h1>
+                <p class="login-subtitle">숫자를 따라 써보세요!</p>
+            </div>
+            <div class="login-buttons">
+                <button class="login-btn kakao" onclick="socialLogin('kakao')">
+                    <svg width="20" height="20" viewBox="0 0 20 20"><path d="M10 2C5.03 2 1 5.13 1 8.97c0 2.48 1.64 4.66 4.1 5.88l-.7 3.15 3.56-2.34c.66.1 1.34.15 2.04.15 4.97 0 9-3.13 9-6.97S14.97 2 10 2z" fill="#191919"/></svg>
+                    카카오 로그인
+                </button>
+                <button class="login-btn naver" onclick="socialLogin('naver')">
+                    <svg width="20" height="20" viewBox="0 0 20 20"><path d="M13.36 10.57L6.4 2H2v16h4.64V9.43L13.6 18H18V2h-4.64z" fill="white"/></svg>
+                    네이버 로그인
+                </button>
+                <button class="login-btn google" onclick="socialLogin('google')">
+                    <svg width="20" height="20" viewBox="0 0 20 20"><path d="M19.6 10.23c0-.68-.06-1.36-.17-2.01H10v3.8h5.38a4.6 4.6 0 01-2 3.02v2.5h3.24c1.89-1.74 2.98-4.3 2.98-7.31z" fill="#4285F4"/><path d="M10 20c2.7 0 4.96-.9 6.62-2.43l-3.24-2.5c-.9.6-2.04.95-3.38.95-2.6 0-4.8-1.76-5.58-4.12H1.08v2.58A10 10 0 0010 20z" fill="#34A853"/><path d="M4.42 11.9A6.01 6.01 0 014.1 10c0-.66.12-1.3.32-1.9V5.52H1.08A10 10 0 000 10c0 1.6.39 3.12 1.08 4.48l3.34-2.58z" fill="#FBBC05"/><path d="M10 3.96c1.47 0 2.78.5 3.81 1.5l2.85-2.85A9.97 9.97 0 0010 0 10 10 0 001.08 5.52l3.34 2.58C5.2 5.72 7.4 3.96 10 3.96z" fill="#EA4335"/></svg>
+                    Google 로그인
+                </button>
+                <button class="login-btn facebook" onclick="socialLogin('facebook')">
+                    <svg width="20" height="20" viewBox="0 0 20 20"><path d="M18.9 0H1.1C.49 0 0 .49 0 1.1v17.8c0 .61.49 1.1 1.1 1.1h9.58v-7.75H8.08v-3.02h2.6V7.07c0-2.58 1.58-3.99 3.88-3.99 1.1 0 2.05.08 2.33.12v2.7h-1.6c-1.25 0-1.5.6-1.5 1.47v1.93h3l-.39 3.02h-2.61V20h5.12c.6 0 1.1-.49 1.1-1.1V1.1C20 .49 19.51 0 18.9 0z" fill="white"/></svg>
+                    Facebook 로그인
+                </button>
+            </div>
+        </div>
+
+        <!-- Home View -->
+        <div id="home-view" class="hidden">
+            <div class="app-header">
+                <svg class="turtle-logo" viewBox="0 0 120 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <ellipse cx="30" cy="72" rx="10" ry="6" fill="#F2DC8C" stroke="#3A9B6A" stroke-width="2" transform="rotate(-20 30 72)"/>
+                    <ellipse cx="78" cy="76" rx="10" ry="6" fill="#F2DC8C" stroke="#3A9B6A" stroke-width="2" transform="rotate(15 78 76)"/>
+                    <ellipse cx="28" cy="54" rx="9" ry="5.5" fill="#F2DC8C" stroke="#3A9B6A" stroke-width="2" transform="rotate(-10 28 54)"/>
+                    <path d="M18 60 L10 55" stroke="#F2DC8C" stroke-width="4" stroke-linecap="round"/>
+                    <ellipse cx="55" cy="58" rx="35" ry="20" fill="#F5E6C8" stroke="#3A9B6A" stroke-width="2"/>
+                    <ellipse cx="52" cy="42" rx="32" ry="28" fill="#7EDCAA" stroke="#3A9B6A" stroke-width="2.5"/>
+                    <path d="M52 18 L42 32 L42 48 L52 58 L62 48 L62 32 Z" fill="none" stroke="#3A9B6A" stroke-width="1.3" opacity=".35"/>
+                    <line x1="42" y1="32" x2="24" y2="38" stroke="#3A9B6A" stroke-width="1.3" opacity=".35"/>
+                    <line x1="62" y1="32" x2="80" y2="38" stroke="#3A9B6A" stroke-width="1.3" opacity=".35"/>
+                    <line x1="42" y1="48" x2="26" y2="56" stroke="#3A9B6A" stroke-width="1.3" opacity=".35"/>
+                    <line x1="62" y1="48" x2="78" y2="56" stroke="#3A9B6A" stroke-width="1.3" opacity=".35"/>
+                    <ellipse cx="42" cy="26" rx="6" ry="4" fill="white" opacity=".35" transform="rotate(-15 42 26)"/>
+                    <ellipse cx="62" cy="36" rx="4" ry="3" fill="white" opacity=".2"/>
+                    <ellipse cx="92" cy="40" rx="17" ry="15" fill="#F5E6C8" stroke="#3A9B6A" stroke-width="2.5"/>
+                    <ellipse cx="82" cy="72" rx="10" ry="6" fill="#F2DC8C" stroke="#3A9B6A" stroke-width="2" transform="rotate(10 82 72)"/>
+                    <circle cx="99" cy="35" r="4" fill="white" stroke="#3A9B6A" stroke-width="1.5"/>
+                    <circle cx="100" cy="34" r="2.5" fill="#3A9B6A"/>
+                    <circle cx="101" cy="33" r="1" fill="white"/>
+                    <circle cx="100" cy="44" r="3.5" fill="#F0A050" opacity=".4"/>
+                    <path d="M94 46 Q98 50 103 46" fill="none" stroke="#3A9B6A" stroke-width="1.5" stroke-linecap="round"/>
+                </svg>
+                <h1><span class="title-blue">느린</span><span class="title-orange">아이</span> 숫자쓰기</h1>
+                <p style="font-size: 0.9rem; color: #B8AD9E; margin-top: 4px;">어떤 숫자를 써볼까요?</p>
+            </div>
+
+            <label class="sec-label">모드</label>
+            <div class="mode-grid" id="mode-grid">
+                <div class="mode-card sel" data-mode="guide">
+                    <div class="m-icon">📐</div>
+                    <div class="m-name">가이드 영역</div>
+                </div>
+                <div class="mode-card" data-mode="dots">
+                    <div class="m-icon">🔵</div>
+                    <div class="m-name">점+가이드선</div>
+                </div>
+                <div class="mode-card" data-mode="dotted">
+                    <div class="m-icon">✏️</div>
+                    <div class="m-name">점선 따라쓰기</div>
+                </div>
+                <div class="mode-card" data-mode="free">
+                    <div class="m-icon">🖐️</div>
+                    <div class="m-name">자유 쓰기</div>
+                </div>
+            </div>
+
+            <label class="sec-label">숫자</label>
+            <div class="num-grid" id="num-grid"></div>
+
+            <label class="sec-label">난이도</label>
+            <div class="row-btns" id="diff-row">
+                <button class="seg-btn sel-green" data-diff="easy">쉬움</button>
+                <button class="seg-btn" data-diff="normal">보통</button>
+                <button class="seg-btn" data-diff="hard">어려움</button>
+            </div>
+
+            <button class="start-btn" id="start-btn">시작하기</button>
+
+            <div class="logout-wrap">
+                <button class="logout-btn" id="logout-btn">로그아웃</button>
+            </div>
+        </div>
+
+        <!-- Game View -->
+        <div id="game-view" class="hidden">
+            <div class="game-nav">
+                <button class="btn-back" id="btn-back" title="홈으로">
+                    <svg width="18" height="18" viewBox="0 0 20 20" fill="none"><path d="M3 10L10 3L17 10M5 8.5V16H8.5V12H11.5V16H15V8.5" stroke="#8C8070" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                </button>
+                <div class="nav-title" id="nav-title">숫자 1</div>
+                <span class="badge" id="diff-badge">쉬움</span>
+            </div>
+
+            <div class="canvas-wrap" id="canvas-wrap">
+                <canvas id="gc"></canvas>
+            </div>
+
+            <div class="instr" id="instr">출발점에서 시작하여 숫자를 써보세요</div>
+            <div class="action-btns">
+                <button class="btn-retry" onclick="retry()">다시 쓰기</button>
+                <button class="btn-change" onclick="nextNum()">다음 숫자</button>
+            </div>
+        </div>
+    </div>
+
+<script>
+// ══════════════════════════════════════════════════════════════
+// State
+// ══════════════════════════════════════════════════════════════
+const G = {
+    mode: 'guide',   // guide | dots | dotted
+    num: 1,
+    diff: 'easy',
+    drawing: false,
+    over: false,
+    pts: [],
+    strokes: [],       // completed strokes
+    currentStroke: 0,   // which stroke we're on
+    failed: false,
+};
+
+const MODE_LBL = { guide: '가이드 영역', dots: '점+가이드선', dotted: '점선 따라쓰기', free: '자유 쓰기' };
+const DIFF_LBL = { easy: '쉬움', normal: '보통', hard: '어려움' };
+const TOL = { easy: 48, normal: 32, hard: 20 };
+
+// ══════════════════════════════════════════════════════════════
+// Number stroke definitions (normalized 0-1 coordinate system)
+// Each number has an array of strokes, each stroke is an array of points
+// ══════════════════════════════════════════════════════════════
+const NUM_STROKES = {
+    1: [
+        // Single vertical stroke from top to bottom
+        [{x:0.5,y:0.1},{x:0.5,y:0.9}]
+    ],
+    2: [
+        // Curve top then diagonal down then horizontal bottom
+        [
+            {x:0.2,y:0.3},
+            {x:0.22,y:0.22},{x:0.28,y:0.15},{x:0.36,y:0.12},
+            {x:0.44,y:0.1},{x:0.56,y:0.1},{x:0.64,y:0.12},
+            {x:0.72,y:0.15},{x:0.78,y:0.22},{x:0.8,y:0.3},
+            {x:0.78,y:0.38},{x:0.72,y:0.46},{x:0.64,y:0.54},
+            {x:0.54,y:0.62},{x:0.44,y:0.7},{x:0.34,y:0.78},
+            {x:0.24,y:0.86},{x:0.2,y:0.9},
+            {x:0.35,y:0.9},{x:0.5,y:0.9},{x:0.65,y:0.9},{x:0.8,y:0.9}
+        ]
+    ],
+    3: [
+        // Top half arc
+        [
+            {x:0.25,y:0.18},
+            {x:0.3,y:0.12},{x:0.4,y:0.1},{x:0.5,y:0.1},
+            {x:0.6,y:0.1},{x:0.72,y:0.14},{x:0.78,y:0.24},
+            {x:0.8,y:0.32},{x:0.76,y:0.4},{x:0.68,y:0.46},
+            {x:0.58,y:0.5},{x:0.5,y:0.5}
+        ],
+        // Bottom half arc
+        [
+            {x:0.5,y:0.5},
+            {x:0.6,y:0.5},{x:0.72,y:0.56},{x:0.78,y:0.64},
+            {x:0.8,y:0.72},{x:0.76,y:0.8},{x:0.68,y:0.86},
+            {x:0.58,y:0.9},{x:0.48,y:0.9},{x:0.38,y:0.88},
+            {x:0.28,y:0.82},{x:0.22,y:0.76}
+        ]
+    ],
+    4: [
+        // Diagonal down-left then horizontal right
+        [
+            {x:0.65,y:0.1},
+            {x:0.58,y:0.2},{x:0.5,y:0.3},{x:0.42,y:0.4},
+            {x:0.34,y:0.5},{x:0.26,y:0.6},{x:0.2,y:0.65},
+            {x:0.35,y:0.65},{x:0.5,y:0.65},{x:0.65,y:0.65},{x:0.8,y:0.65}
+        ],
+        // Vertical line on the right
+        [
+            {x:0.65,y:0.35},{x:0.65,y:0.5},{x:0.65,y:0.65},
+            {x:0.65,y:0.75},{x:0.65,y:0.9}
+        ]
+    ],
+    5: [
+        // Top horizontal line going right
+        [
+            {x:0.3,y:0.1},{x:0.45,y:0.1},{x:0.6,y:0.1},{x:0.75,y:0.1}
+        ],
+        // Down and curve (starts from left end)
+        [
+            {x:0.3,y:0.1},
+            {x:0.3,y:0.2},{x:0.3,y:0.3},{x:0.3,y:0.4},{x:0.3,y:0.48},
+            {x:0.4,y:0.44},{x:0.5,y:0.43},{x:0.6,y:0.45},
+            {x:0.7,y:0.5},{x:0.76,y:0.58},{x:0.78,y:0.68},
+            {x:0.76,y:0.76},{x:0.7,y:0.83},{x:0.6,y:0.88},
+            {x:0.5,y:0.9},{x:0.4,y:0.88},{x:0.3,y:0.84},
+            {x:0.22,y:0.78}
+        ]
+    ],
+    6: [
+        // Top curve down and full circle
+        [
+            {x:0.65,y:0.15},
+            {x:0.55,y:0.1},{x:0.42,y:0.12},{x:0.32,y:0.2},
+            {x:0.24,y:0.3},{x:0.2,y:0.42},{x:0.2,y:0.55},
+            {x:0.2,y:0.65},{x:0.24,y:0.76},{x:0.32,y:0.84},
+            {x:0.42,y:0.9},{x:0.54,y:0.9},{x:0.64,y:0.86},
+            {x:0.72,y:0.78},{x:0.76,y:0.68},{x:0.76,y:0.58},
+            {x:0.72,y:0.5},{x:0.64,y:0.44},{x:0.54,y:0.42},
+            {x:0.44,y:0.44},{x:0.34,y:0.5},{x:0.26,y:0.58},
+            {x:0.22,y:0.66}
+        ]
+    ],
+    7: [
+        // Horizontal top then diagonal down
+        [
+            {x:0.2,y:0.1},{x:0.35,y:0.1},{x:0.5,y:0.1},{x:0.65,y:0.1},{x:0.8,y:0.1},
+            {x:0.72,y:0.24},{x:0.64,y:0.38},{x:0.56,y:0.52},
+            {x:0.48,y:0.66},{x:0.42,y:0.78},{x:0.38,y:0.9}
+        ]
+    ],
+    8: [
+        // Top circle
+        [
+            {x:0.5,y:0.48},
+            {x:0.38,y:0.44},{x:0.28,y:0.36},{x:0.26,y:0.26},
+            {x:0.28,y:0.18},{x:0.36,y:0.12},{x:0.44,y:0.1},
+            {x:0.56,y:0.1},{x:0.64,y:0.12},{x:0.72,y:0.18},
+            {x:0.74,y:0.26},{x:0.72,y:0.36},{x:0.62,y:0.44},
+            {x:0.5,y:0.48}
+        ],
+        // Bottom circle
+        [
+            {x:0.5,y:0.48},
+            {x:0.38,y:0.52},{x:0.26,y:0.6},{x:0.22,y:0.7},
+            {x:0.24,y:0.8},{x:0.32,y:0.86},{x:0.42,y:0.9},
+            {x:0.58,y:0.9},{x:0.68,y:0.86},{x:0.76,y:0.8},
+            {x:0.78,y:0.7},{x:0.74,y:0.6},{x:0.62,y:0.52},
+            {x:0.5,y:0.48}
+        ]
+    ],
+    9: [
+        // Top circle then tail down
+        [
+            {x:0.76,y:0.38},
+            {x:0.72,y:0.28},{x:0.64,y:0.2},{x:0.54,y:0.14},
+            {x:0.44,y:0.12},{x:0.34,y:0.16},{x:0.26,y:0.24},
+            {x:0.22,y:0.34},{x:0.24,y:0.44},{x:0.32,y:0.5},
+            {x:0.42,y:0.54},{x:0.54,y:0.54},{x:0.64,y:0.5},
+            {x:0.72,y:0.44},{x:0.76,y:0.38}
+        ],
+        // Tail down
+        [
+            {x:0.76,y:0.38},
+            {x:0.76,y:0.5},{x:0.74,y:0.62},{x:0.68,y:0.74},
+            {x:0.6,y:0.82},{x:0.5,y:0.88},{x:0.38,y:0.9}
+        ]
+    ],
+    10: [
+        // "1" part (left side)
+        [{x:0.2,y:0.1},{x:0.2,y:0.9}],
+        // "0" part (right side - oval)
+        [
+            {x:0.55,y:0.1},
+            {x:0.65,y:0.1},{x:0.74,y:0.16},{x:0.79,y:0.26},
+            {x:0.82,y:0.38},{x:0.82,y:0.5},{x:0.82,y:0.62},
+            {x:0.79,y:0.74},{x:0.74,y:0.84},{x:0.65,y:0.9},
+            {x:0.55,y:0.9},{x:0.45,y:0.9},{x:0.38,y:0.84},
+            {x:0.33,y:0.74},{x:0.3,y:0.62},{x:0.3,y:0.5},
+            {x:0.3,y:0.38},{x:0.33,y:0.26},{x:0.38,y:0.16},
+            {x:0.45,y:0.1},{x:0.55,y:0.1}
+        ]
+    ]
+};
+
+// ══════════════════════════════════════════════════════════════
+// Interpolate strokes for smoother paths
+// ══════════════════════════════════════════════════════════════
+function interpolateStroke(points, numPts) {
+    if (points.length < 2) return points;
+    // Calculate total length
+    let totalLen = 0;
+    const segLens = [];
+    for (let i = 1; i < points.length; i++) {
+        const len = Math.hypot(points[i].x - points[i-1].x, points[i].y - points[i-1].y);
+        segLens.push(len);
+        totalLen += len;
+    }
+    const result = [];
+    for (let i = 0; i <= numPts; i++) {
+        const target = (i / numPts) * totalLen;
+        let cum = 0;
+        for (let s = 0; s < segLens.length; s++) {
+            if (cum + segLens[s] >= target || s === segLens.length - 1) {
+                const t = segLens[s] > 0 ? Math.min(1, (target - cum) / segLens[s]) : 0;
+                result.push({
+                    x: points[s].x + (points[s+1].x - points[s].x) * t,
+                    y: points[s].y + (points[s+1].y - points[s].y) * t
+                });
+                break;
+            }
+            cum += segLens[s];
+        }
+    }
+    return result;
+}
+
+function getScaledStrokes(num, w, h) {
+    const raw = NUM_STROKES[num];
+    const margin = 20;
+    const usableW = w - margin * 2;
+    const usableH = h - margin * 2;
+    return raw.map(stroke => {
+        const interp = interpolateStroke(stroke, 150);
+        return interp.map(p => ({
+            x: margin + p.x * usableW,
+            y: margin + p.y * usableH
+        }));
+    });
+}
+
+// ══════════════════════════════════════════════════════════════
+// Social login (stub)
+// ══════════════════════════════════════════════════════════════
+function socialLogin(provider) {
+    document.getElementById('login-view').classList.add('hidden');
+    document.getElementById('home-view').classList.remove('hidden');
+}
+
+// ══════════════════════════════════════════════════════════════
+// DOM Setup
+// ══════════════════════════════════════════════════════════════
+const homeView = document.getElementById('home-view');
+const gameView = document.getElementById('game-view');
+const canvasWrap = document.getElementById('canvas-wrap');
+const gc = document.getElementById('gc');
+const ctx = gc.getContext('2d');
+
+// Build number grid
+(function() {
+    const grid = document.getElementById('num-grid');
+    for (let i = 1; i <= 10; i++) {
+        const card = document.createElement('div');
+        card.className = 'num-card' + (i === 1 ? ' sel' : '');
+        card.dataset.num = i;
+        card.textContent = i;
+        grid.appendChild(card);
+    }
+})();
+
+// Number selection
+document.getElementById('num-grid').addEventListener('click', e => {
+    const card = e.target.closest('.num-card');
+    if (!card) return;
+    document.querySelectorAll('.num-card').forEach(c => c.classList.remove('sel'));
+    card.classList.add('sel');
+    G.num = parseInt(card.dataset.num);
+});
+
+// Mode selection
+document.getElementById('mode-grid').addEventListener('click', e => {
+    const card = e.target.closest('.mode-card');
+    if (!card) return;
+    document.querySelectorAll('.mode-card').forEach(c => c.classList.remove('sel'));
+    card.classList.add('sel');
+    G.mode = card.dataset.mode;
+});
+
+// Difficulty
+document.getElementById('diff-row').addEventListener('click', e => {
+    const b = e.target.closest('.seg-btn');
+    if (!b) return;
+    document.querySelectorAll('#diff-row .seg-btn').forEach(x => x.classList.remove('sel-green'));
+    b.classList.add('sel-green');
+    G.diff = b.dataset.diff;
+});
+
+// Start
+document.getElementById('start-btn').addEventListener('click', () => {
+    homeView.classList.add('hidden');
+    gameView.classList.remove('hidden');
+    document.getElementById('nav-title').textContent = '숫자 ' + G.num + ' - ' + MODE_LBL[G.mode];
+    document.getElementById('diff-badge').textContent = DIFF_LBL[G.diff];
+    requestAnimationFrame(() => {
+        initCanvas();
+        resetGame();
+        updateInstr();
+        render();
+    });
+});
+
+// Back
+document.getElementById('btn-back').addEventListener('click', () => {
+    gameView.classList.add('hidden');
+    homeView.classList.remove('hidden');
+});
+
+// Logout
+document.getElementById('logout-btn').addEventListener('click', () => {
+    homeView.classList.add('hidden');
+    document.getElementById('login-view').classList.remove('hidden');
+});
+
+// ══════════════════════════════════════════════════════════════
+// Canvas
+// ══════════════════════════════════════════════════════════════
+let LW = 0, LH = 0;
+let scaledStrokes = [];
+
+function initCanvas() {
+    const dpr = window.devicePixelRatio || 1;
+    canvasWrap.style.width = '';
+    LW = canvasWrap.clientWidth - 5;
+    LH = Math.max(320, Math.min(Math.floor(window.innerHeight * 0.48), 420));
+    gc.width = Math.round(LW * dpr);
+    gc.height = Math.round(LH * dpr);
+    gc.style.width = LW + 'px';
+    gc.style.height = LH + 'px';
+    ctx.setTransform(1, 0, 0, 1, 0, 0);
+    ctx.scale(dpr, dpr);
+    scaledStrokes = getScaledStrokes(G.num, LW, LH);
+}
+
+function resetGame() {
+    G.drawing = false;
+    G.over = false;
+    G.pts = [];
+    G.strokes = [];
+    G.currentStroke = 0;
+    G.failed = false;
+}
+
+// ══════════════════════════════════════════════════════════════
+// Distance helpers
+// ══════════════════════════════════════════════════════════════
+function distToSegment(px, py, ax, ay, bx, by) {
+    const dx = bx - ax, dy = by - ay;
+    const l2 = dx * dx + dy * dy;
+    const t = l2 === 0 ? 0 : Math.max(0, Math.min(1, ((px - ax) * dx + (py - ay) * dy) / l2));
+    return Math.hypot(px - (ax + t * dx), py - (ay + t * dy));
+}
+
+function distToStroke(px, py, stroke) {
+    let min = Infinity;
+    for (let i = 0; i < stroke.length - 1; i++) {
+        min = Math.min(min, distToSegment(px, py, stroke[i].x, stroke[i].y, stroke[i+1].x, stroke[i+1].y));
+    }
+    return min;
+}
+
+function near(px, py, pt, r) {
+    return Math.hypot(px - pt.x, py - pt.y) < r;
+}
+
+// ══════════════════════════════════════════════════════════════
+// Offset path for guide corridor
+// ══════════════════════════════════════════════════════════════
+function offsetPath(path, d) {
+    return path.map((p, i) => {
+        let tx, ty;
+        if (i === 0) { tx = path[1].x - p.x; ty = path[1].y - p.y; }
+        else if (i === path.length - 1) { tx = p.x - path[i-1].x; ty = p.y - path[i-1].y; }
+        else { tx = path[i+1].x - path[i-1].x; ty = path[i+1].y - path[i-1].y; }
+        const l = Math.hypot(tx, ty) || 1;
+        return { x: p.x + (-ty / l) * d, y: p.y + (tx / l) * d };
+    });
+}
+
+// ══════════════════════════════════════════════════════════════
+// Render
+// ══════════════════════════════════════════════════════════════
+function render() {
+    const w = LW, h = LH;
+    const tol = TOL[G.diff];
+    ctx.clearRect(0, 0, w, h);
+
+    // Background
+    ctx.fillStyle = '#FAFAF8';
+    ctx.fillRect(0, 0, w, h);
+
+    // Draw light grid lines
+    ctx.strokeStyle = 'rgba(200,192,180,0.2)';
+    ctx.lineWidth = 1;
+    ctx.setLineDash([]);
+    ctx.beginPath();
+    ctx.moveTo(0, h / 2);
+    ctx.lineTo(w, h / 2);
+    ctx.stroke();
+
+    if (G.mode === 'free') {
+        // Free mode: empty canvas, just show faint number as reference
+        if (!G.over) {
+            ctx.fillStyle = 'rgba(200,192,180,0.13)';
+            ctx.font = 'bold ' + Math.floor(h * 0.7) + 'px "Noto Sans KR", sans-serif';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText(G.num, w / 2, h / 2);
+        }
+    } else {
+        const currentStroke = scaledStrokes[G.currentStroke];
+        if (!currentStroke) return;
+
+        // Draw already completed strokes in gray
+        for (let s = 0; s < G.currentStroke; s++) {
+            drawStrokePath(scaledStrokes[s], 'rgba(180,170,160,0.4)', 3);
+        }
+
+        // Draw future strokes lightly
+        for (let s = G.currentStroke + 1; s < scaledStrokes.length; s++) {
+            drawStrokePath(scaledStrokes[s], 'rgba(200,192,180,0.2)', 2);
+        }
+
+        // Draw current stroke guide based on mode
+        if (G.mode === 'guide') {
+            renderGuideMode(currentStroke, tol);
+        } else if (G.mode === 'dots') {
+            renderDotsMode(currentStroke, tol);
+        } else if (G.mode === 'dotted') {
+            renderDottedMode(currentStroke);
+        }
+    }
+
+    // Draw user strokes (completed) - smooth
+    G.strokes.forEach(stroke => {
+        if (stroke.length > 1) {
+            ctx.beginPath();
+            drawSmoothPath(stroke);
+            ctx.strokeStyle = '#5BC886';
+            ctx.lineWidth = 5;
+            ctx.lineCap = 'round';
+            ctx.lineJoin = 'round';
+            ctx.setLineDash([]);
+            ctx.stroke();
+        }
+    });
+
+    // Draw current user drawing - smooth
+    if (G.pts.length > 1) {
+        ctx.beginPath();
+        drawSmoothPath(G.pts);
+        ctx.strokeStyle = '#5BC886';
+        ctx.lineWidth = 5;
+        ctx.lineCap = 'round';
+        ctx.lineJoin = 'round';
+        ctx.setLineDash([]);
+        ctx.stroke();
+    }
+}
+
+// Smooth curve through points using quadratic bezier
+function drawSmoothPath(points) {
+    if (points.length < 2) return;
+    ctx.moveTo(points[0].x, points[0].y);
+    if (points.length === 2) {
+        ctx.lineTo(points[1].x, points[1].y);
+        return;
+    }
+    for (let i = 0; i < points.length - 1; i++) {
+        const xm = (points[i].x + points[i+1].x) / 2;
+        const ym = (points[i].y + points[i+1].y) / 2;
+        if (i === 0) {
+            ctx.lineTo(xm, ym);
+        } else {
+            ctx.quadraticCurveTo(points[i].x, points[i].y, xm, ym);
+        }
+    }
+    const last = points[points.length - 1];
+    ctx.lineTo(last.x, last.y);
+}
+
+function drawStrokePath(stroke, color, width) {
+    if (stroke.length < 2) return;
+    ctx.beginPath();
+    drawSmoothPath(stroke);
+    ctx.strokeStyle = color;
+    ctx.lineWidth = width;
+    ctx.lineCap = 'round';
+    ctx.lineJoin = 'round';
+    ctx.setLineDash([]);
+    ctx.stroke();
+}
+
+function renderGuideMode(stroke, tol) {
+    // Draw corridor (guide area) with smooth curves
+    const up = offsetPath(stroke, -tol);
+    const lo = offsetPath(stroke, tol);
+
+    // Fill corridor
+    ctx.beginPath();
+    drawSmoothPath(up);
+    const loRev = lo.slice().reverse();
+    ctx.lineTo(loRev[0].x, loRev[0].y);
+    for (let i = 0; i < loRev.length - 1; i++) {
+        const xm = (loRev[i].x + loRev[i+1].x) / 2;
+        const ym = (loRev[i].y + loRev[i+1].y) / 2;
+        if (i === 0) { ctx.lineTo(xm, ym); }
+        else { ctx.quadraticCurveTo(loRev[i].x, loRev[i].y, xm, ym); }
+    }
+    ctx.lineTo(loRev[loRev.length-1].x, loRev[loRev.length-1].y);
+    ctx.closePath();
+    ctx.fillStyle = 'rgba(91,200,134,.08)';
+    ctx.fill();
+
+    // Corridor borders (smooth)
+    [up, lo].forEach(pts => {
+        ctx.beginPath();
+        drawSmoothPath(pts);
+        ctx.strokeStyle = 'rgba(91,200,134,.25)';
+        ctx.lineWidth = 1;
+        ctx.setLineDash([6, 6]);
+        ctx.stroke();
+        ctx.setLineDash([]);
+    });
+
+    // Center guide (smooth, light)
+    ctx.beginPath();
+    drawSmoothPath(stroke);
+    ctx.strokeStyle = 'rgba(110,90,70,.12)';
+    ctx.lineWidth = 2;
+    ctx.setLineDash([8, 8]);
+    ctx.stroke();
+    ctx.setLineDash([]);
+}
+
+function renderDotsMode(stroke, tol) {
+    // Draw smooth center guide line (dashed)
+    ctx.beginPath();
+    drawSmoothPath(stroke);
+    ctx.strokeStyle = 'rgba(110,90,70,.35)';
+    ctx.lineWidth = 1.5;
+    ctx.lineCap = 'round';
+    ctx.setLineDash([6, 8]);
+    ctx.stroke();
+    ctx.setLineDash([]);
+
+    // Draw dots along the path
+    const dotCount = 10;
+    const step = Math.floor(stroke.length / (dotCount - 1));
+    for (let i = 0; i < dotCount; i++) {
+        const idx = Math.min(i * step, stroke.length - 1);
+        const p = stroke[idx];
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, 5.5, 0, Math.PI * 2);
+        ctx.fillStyle = '#2E7FD9';
+        ctx.fill();
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, 5.5, 0, Math.PI * 2);
+        ctx.strokeStyle = 'white';
+        ctx.lineWidth = 1.5;
+        ctx.stroke();
+    }
+
+    // Draw numbered order on first, middle, last dots
+    const labelDots = [0, Math.floor(dotCount / 2), dotCount - 1];
+    labelDots.forEach((di, idx) => {
+        const pidx = Math.min(di * step, stroke.length - 1);
+        const p = stroke[pidx];
+        ctx.fillStyle = 'white';
+        ctx.font = 'bold 7px "Noto Sans KR", sans-serif';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText(idx + 1, p.x, p.y);
+    });
+}
+
+function renderDottedMode(stroke) {
+    // Draw smooth dotted line
+    ctx.beginPath();
+    drawSmoothPath(stroke);
+    ctx.strokeStyle = 'rgba(74,64,53,.3)';
+    ctx.lineWidth = 6;
+    ctx.lineCap = 'round';
+    ctx.lineJoin = 'round';
+    ctx.setLineDash([2, 9]);
+    ctx.stroke();
+    ctx.setLineDash([]);
+
+    // Direction arrows along the path (smaller, softer)
+    const arrowCount = 4;
+    const arrowStep = Math.floor(stroke.length / (arrowCount + 1));
+    for (let i = 1; i <= arrowCount; i++) {
+        const idx = Math.min(i * arrowStep, stroke.length - 2);
+        const p = stroke[idx];
+        const pn = stroke[Math.min(idx + 8, stroke.length - 1)];
+        const angle = Math.atan2(pn.y - p.y, pn.x - p.x);
+        ctx.save();
+        ctx.translate(p.x, p.y);
+        ctx.rotate(angle);
+        ctx.beginPath();
+        ctx.moveTo(5, 0);
+        ctx.lineTo(-2.5, -3.5);
+        ctx.lineTo(-2.5, 3.5);
+        ctx.closePath();
+        ctx.fillStyle = 'rgba(240,144,30,.4)';
+        ctx.fill();
+        ctx.restore();
+    }
+}
+
+function mkr(x, y, color, label) {
+    const r = 16;
+    ctx.beginPath();
+    ctx.arc(x, y, r, 0, Math.PI * 2);
+    ctx.fillStyle = color;
+    ctx.fill();
+    ctx.strokeStyle = 'white';
+    ctx.lineWidth = 2;
+    ctx.stroke();
+    ctx.fillStyle = 'white';
+    ctx.font = 'bold 8px "Noto Sans KR", sans-serif';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(label, x, y);
+}
+
+// ══════════════════════════════════════════════════════════════
+// Input handling
+// ══════════════════════════════════════════════════════════════
+function getPos(e) {
+    const r = gc.getBoundingClientRect();
+    const s = e.touches ? e.touches[0] : e;
+    return { x: (s.clientX - r.left) * (LW / r.width), y: (s.clientY - r.top) * (LH / r.height) };
+}
+
+gc.addEventListener('touchstart', onStart, { passive: false });
+gc.addEventListener('touchmove', onMove, { passive: false });
+gc.addEventListener('touchend', onEnd, { passive: false });
+gc.addEventListener('mousedown', onStart);
+gc.addEventListener('mousemove', onMove);
+gc.addEventListener('mouseup', onEnd);
+
+function onStart(e) {
+    e.preventDefault();
+    if (G.over) return;
+    const p = getPos(e);
+
+    if (G.mode === 'free') {
+        G.drawing = true;
+        G.pts = [p];
+        render();
+        return;
+    }
+
+    const currentStroke = scaledStrokes[G.currentStroke];
+    if (!currentStroke) return;
+
+    if (!near(p.x, p.y, currentStroke[0], 30)) return;
+
+    G.drawing = true;
+    G.pts = [p];
+    G.failed = false;
+    document.getElementById('instr').textContent = '';
+    render();
+}
+
+function onMove(e) {
+    e.preventDefault();
+    if (!G.drawing || G.over) return;
+    const p = getPos(e);
+    const last = G.pts[G.pts.length - 1];
+    if (last) {
+        const dx = p.x - last.x, dy = p.y - last.y;
+        if (dx * dx + dy * dy < 36) return; // min distance 6px
+    }
+    G.pts.push(p);
+
+    if (G.mode !== 'free') {
+        const currentStroke = scaledStrokes[G.currentStroke];
+
+        if (near(p.x, p.y, currentStroke[currentStroke.length - 1], 26)) {
+            finishCurrentStroke();
+        }
+    }
+    render();
+}
+
+function finishCurrentStroke() {
+    G.drawing = false;
+    G.strokes.push([...G.pts]);
+    G.pts = [];
+
+    if (G.currentStroke < scaledStrokes.length - 1) {
+        G.currentStroke++;
+        document.getElementById('instr').textContent = '다음 획을 그어주세요 (' + (G.currentStroke + 1) + '/' + scaledStrokes.length + ')';
+    } else {
+        G.over = true;
+        document.getElementById('instr').textContent = '';
+    }
+}
+
+function onEnd(e) {
+    e.preventDefault();
+    if (G.drawing) {
+        if (G.mode === 'free') {
+            if (G.pts.length > 3) {
+                G.strokes.push([...G.pts]);
+            }
+            G.drawing = false;
+            G.pts = [];
+            render();
+        } else {
+            G.drawing = false;
+        }
+    }
+}
+
+// ══════════════════════════════════════════════════════════════
+// Actions
+// ══════════════════════════════════════════════════════════════
+function updateInstr() {
+    if (G.mode === 'free') {
+        document.getElementById('instr').textContent = '숫자 ' + G.num + '을(를) 자유롭게 써보세요';
+    } else {
+        document.getElementById('instr').textContent = '출발점에서 시작하여 숫자를 써보세요';
+    }
+}
+
+function retry() {
+    resetGame();
+    updateInstr();
+    render();
+}
+
+function nextNum() {
+    if (G.num < 10) {
+        G.num++;
+    } else {
+        G.num = 1;
+    }
+    document.querySelectorAll('.num-card').forEach(c => {
+        c.classList.toggle('sel', parseInt(c.dataset.num) === G.num);
+    });
+    document.getElementById('nav-title').textContent = '숫자 ' + G.num + ' - ' + MODE_LBL[G.mode];
+    scaledStrokes = getScaledStrokes(G.num, LW, LH);
+    resetGame();
+    updateInstr();
+    render();
+}
+
+function goHome() {
+    gameView.classList.add('hidden');
+    homeView.classList.remove('hidden');
+}
+</script>
+</body>
+</html>
