@@ -41,12 +41,12 @@
         .sec-label { font-size: .875rem; font-weight: 700; color: #4A4035; margin: 0 0 10px; }
 
         /* ── Mode Selection ── */
-        .mode-grid { display: grid; grid-template-columns: repeat(4,1fr); gap: 8px; margin-bottom: 18px; }
-        .mode-card { border: 2.5px solid #E8E2DA; border-radius: 16px; padding: 14px 6px 12px; background: white; cursor: pointer; text-align: center; transition: all .15s; }
+        .mode-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 10px; margin-bottom: 18px; }
+        .mode-card { border: 2.5px solid #E8E2DA; border-radius: 16px; padding: 16px 8px 14px; background: white; cursor: pointer; text-align: center; transition: all .15s; }
         .mode-card:active { transform: scale(.95); }
         .mode-card.sel { border-color: #F0901E; background: #FFF8F0; }
-        .mode-card .m-icon { height: 42px; display: flex; align-items: center; justify-content: center; margin-bottom: 6px; font-size: 1.8rem; }
-        .mode-card .m-name { font-size: .8rem; font-weight: 700; color: #4A4035; }
+        .mode-card .m-icon { height: 54px; display: flex; align-items: center; justify-content: center; margin-bottom: 8px; font-size: 1.8rem; }
+        .mode-card .m-name { font-size: .85rem; font-weight: 700; color: #4A4035; }
 
         /* ── Number Grid ── */
         .num-grid { display: grid; grid-template-columns: repeat(5,1fr); gap: 8px; margin-bottom: 18px; }
@@ -169,43 +169,35 @@
             <label class="sec-label">모드</label>
             <div class="mode-grid" id="mode-grid">
                 <div class="mode-card sel" data-mode="guide">
-                    <div class="m-icon"><svg width="42" height="42" viewBox="0 0 42 42">
-                        <!-- corridor fill -->
-                        <path d="M10 14 Q10 8 16 6 L22 6 Q28 6 30 10 L30 14 Q30 18 26 22 L20 28 Q16 32 14 36 L14 38 L30 38" stroke="none" fill="rgba(91,200,134,.08)"/>
-                        <!-- corridor border -->
-                        <path d="M8 14 Q8 6 15 4 L23 4 Q30 4 32 10 L32 14 Q32 20 28 24 L22 30 Q18 34 16 38 L12 38" stroke="rgba(91,200,134,.35)" stroke-width="1" fill="none" stroke-dasharray="3 3"/>
-                        <path d="M12 14 Q12 10 17 8 L21 8 Q26 8 28 12 L28 14 Q28 18 24 22 L18 28 Q14 32 12 36 L16 38 L32 38" stroke="rgba(91,200,134,.35)" stroke-width="1" fill="none" stroke-dasharray="3 3"/>
-                        <!-- center guide line -->
-                        <path d="M10 14 Q10 8 17 6 L22 6 Q28 6 30 12 L30 14 Q30 18 26 22 L20 28 Q16 32 14 38 L30 38" stroke="rgba(110,90,70,.12)" stroke-width="1.5" fill="none" stroke-dasharray="4 4"/>
-                        <!-- direction arrows -->
-                        <polygon points="30,11 27,9 27,13" fill="rgba(91,200,134,.5)"/>
-                        <polygon points="22,26 19,24 19,28" fill="rgba(91,200,134,.5)" transform="rotate(-40 22 26)"/>
+                    <div class="m-icon"><svg width="54" height="54" viewBox="0 0 54 54">
+                        <path d="M13 18 Q13 10 20 8 L28 8 Q36 8 38 14 L38 18 Q38 24 33 29 L26 36 Q21 41 18 48 L18 49 L38 49" stroke="none" fill="rgba(91,200,134,.1)"/>
+                        <path d="M10 18 Q10 7 19 5 L29 5 Q38 5 41 13 L41 18 Q41 25 36 30 L28 38 Q23 43 20 49 L15 49" stroke="rgba(91,200,134,.4)" stroke-width="1.2" fill="none" stroke-dasharray="4 3"/>
+                        <path d="M16 18 Q16 12 22 10 L27 10 Q33 10 35 15 L35 18 Q35 23 31 28 L24 35 Q19 40 17 47 L21 49 L41 49" stroke="rgba(91,200,134,.4)" stroke-width="1.2" fill="none" stroke-dasharray="4 3"/>
+                        <path d="M13 18 Q13 10 20 8 L28 8 Q36 8 38 14 L38 18 Q38 24 33 29 L26 36 Q21 41 18 49 L38 49" stroke="rgba(110,90,70,.15)" stroke-width="1.5" fill="none" stroke-dasharray="5 5"/>
+                        <polygon points="38,14 34,11 34,17" fill="rgba(91,200,134,.55)"/>
+                        <polygon points="28,34 24,31 24,37" fill="rgba(91,200,134,.55)" transform="rotate(-40 28 34)"/>
                     </svg></div>
                     <div class="m-name">가이드 영역</div>
                 </div>
                 <div class="mode-card" data-mode="dotted">
-                    <div class="m-icon"><svg width="42" height="42" viewBox="0 0 42 42">
-                        <!-- dotted number 2 shape -->
-                        <path d="M10 14 Q10 8 17 6 L22 6 Q28 6 30 12 L30 14 Q30 18 26 22 L20 28 Q16 32 14 38 L30 38" stroke="rgba(74,64,53,.3)" stroke-width="4" fill="none" stroke-linecap="round" stroke-dasharray="1.5 6"/>
-                        <!-- direction arrows along path -->
-                        <polygon points="30,11 27,9 27,13" fill="rgba(240,144,30,.5)"/>
-                        <polygon points="22,26 19,24 19,28" fill="rgba(240,144,30,.5)" transform="rotate(-40 22 26)"/>
-                        <polygon points="24,38 22,35.5 22,40.5" fill="rgba(240,144,30,.5)"/>
+                    <div class="m-icon"><svg width="54" height="54" viewBox="0 0 54 54">
+                        <path d="M13 18 Q13 10 20 8 L28 8 Q36 8 38 14 L38 18 Q38 24 33 29 L26 36 Q21 41 18 49 L38 49" stroke="rgba(74,64,53,.3)" stroke-width="5" fill="none" stroke-linecap="round" stroke-dasharray="2 8"/>
+                        <polygon points="38,14 34,11 34,17" fill="rgba(240,144,30,.55)"/>
+                        <polygon points="28,34 24,31 24,37" fill="rgba(240,144,30,.55)" transform="rotate(-40 28 34)"/>
+                        <polygon points="30,49 27,45.5 27,52.5" fill="rgba(240,144,30,.55)"/>
                     </svg></div>
                     <div class="m-name">점선 따라쓰기</div>
                 </div>
                 <div class="mode-card" data-mode="free">
-                    <div class="m-icon"><svg width="42" height="42" viewBox="0 0 42 42">
-                        <!-- pencil drawing number 2 -->
-                        <path d="M10 14 Q10 8 17 6 L22 6 Q28 6 30 12 L30 14 Q30 18 26 22 L20 28" stroke="#5BC886" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
-                        <!-- pencil icon -->
-                        <g transform="translate(19 27) rotate(-50)">
-                            <rect x="-1.5" y="-10" width="3" height="10" rx=".5" fill="#F0901E"/>
-                            <polygon points="-1.5,0 1.5,0 0,3" fill="#4A4035"/>
-                            <rect x="-1.5" y="-10" width="3" height="2" rx=".5" fill="#E8E2DA"/>
+                    <div class="m-icon"><svg width="54" height="54" viewBox="0 0 54 54">
+                        <path d="M13 18 Q13 10 20 8 L28 8 Q36 8 38 14 L38 18 Q38 24 33 29 L26 36" stroke="#5BC886" stroke-width="3" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+                        <g transform="translate(25 35) rotate(-50)">
+                            <rect x="-2" y="-13" width="4" height="13" rx=".7" fill="#F0901E"/>
+                            <polygon points="-2,0 2,0 0,4" fill="#4A4035"/>
+                            <rect x="-2" y="-13" width="4" height="2.5" rx=".7" fill="#E8E2DA"/>
                         </g>
                     </svg></div>
-                    <div class="m-name">자유 쓰기</div>
+                    <div class="m-name">자유쓰기</div>
                 </div>
             </div>
 
@@ -254,7 +246,7 @@
 // ══════════════════════════════════════════════════════════════
 const G = {
     mode: 'guide',   // guide | dotted | free
-    nums: [1],        // selected numbers (multi-select)
+    nums: [1,2,3,4,5,6,7,8,9,10], // selected numbers (multi-select)
     numIdx: 0,        // current index in nums array
     num: 1,           // current number being drawn
     diff: 'easy',
@@ -263,7 +255,7 @@ const G = {
     strokes: [],
 };
 
-const MODE_LBL = { guide: '가이드 영역', dotted: '점선 따라쓰기', free: '자유 쓰기' };
+const MODE_LBL = { guide: '가이드 영역', dotted: '점선 따라쓰기', free: '자유쓰기' };
 const DIFF_LBL = { easy: '쉬움', normal: '보통', hard: '어려움' };
 const TOL = { easy: 48, normal: 32, hard: 20 };
 
@@ -509,7 +501,7 @@ const ctx = gc.getContext('2d');
     const grid = document.getElementById('num-grid');
     for (let i = 1; i <= 10; i++) {
         const card = document.createElement('div');
-        card.className = 'num-card' + (i === 1 ? ' sel' : '');
+        card.className = 'num-card sel';
         card.dataset.num = i;
         card.textContent = i;
         grid.appendChild(card);
