@@ -632,6 +632,9 @@ function updateProgress() {
         else if (i === G.turn) dot.classList.add('current');
     });
     document.getElementById('progress-label').textContent = (G.turn + 1) + '/' + TOTAL_TURNS;
+    // Update button text for last turn
+    const btnChange = document.querySelector('.btn-change');
+    btnChange.textContent = (G.turn >= TOTAL_TURNS - 1) ? '결과 확인' : '다음 숫자';
 }
 
 document.getElementById('start-btn').addEventListener('click', startGame);
