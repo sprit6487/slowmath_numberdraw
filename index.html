@@ -172,10 +172,6 @@
                     <div class="m-icon"><svg width="42" height="42" viewBox="0 0 42 42"><rect x="8" y="6" width="26" height="30" rx="3" fill="rgba(91,200,134,.12)" stroke="rgba(91,200,134,.5)" stroke-width="1.5" stroke-dasharray="4 3"/><path d="M16 12 Q21 20 21 30" stroke="#5BC886" stroke-width="2.5" fill="none" stroke-linecap="round"/></svg></div>
                     <div class="m-name">가이드 영역</div>
                 </div>
-                <div class="mode-card" data-mode="dots">
-                    <div class="m-icon"><svg width="42" height="42" viewBox="0 0 42 42"><path d="M14 10 Q22 18 28 10 Q34 18 28 28 Q22 34 21 38" stroke="rgba(110,90,70,.25)" stroke-width="1" fill="none" stroke-dasharray="4 4"/><circle cx="14" cy="10" r="3.5" fill="#2E7FD9"/><circle cx="28" cy="10" r="3" fill="#2E7FD9"/><circle cx="28" cy="28" r="3" fill="#2E7FD9"/><circle cx="21" cy="38" r="3" fill="#2E7FD9"/><text x="14" y="11" fill="white" font-size="4" font-weight="bold" text-anchor="middle" dominant-baseline="middle">1</text></svg></div>
-                    <div class="m-name">점+가이드선</div>
-                </div>
                 <div class="mode-card" data-mode="dotted">
                     <div class="m-icon"><svg width="42" height="42" viewBox="0 0 42 42"><path d="M14 10 Q22 18 28 10 Q34 18 28 28 Q22 34 21 38" stroke="rgba(74,64,53,.35)" stroke-width="4" fill="none" stroke-linecap="round" stroke-dasharray="2 7"/><polygon points="23,35 19,32 19,38" fill="rgba(240,144,30,.5)"/></svg></div>
                     <div class="m-name">점선 따라쓰기</div>
@@ -230,7 +226,7 @@
 // State
 // ══════════════════════════════════════════════════════════════
 const G = {
-    mode: 'guide',   // guide | dots | dotted
+    mode: 'guide',   // guide | dotted | free
     num: 1,
     diff: 'easy',
     drawing: false,
@@ -241,7 +237,7 @@ const G = {
     failed: false,
 };
 
-const MODE_LBL = { guide: '가이드 영역', dots: '점+가이드선', dotted: '점선 따라쓰기', free: '자유 쓰기' };
+const MODE_LBL = { guide: '가이드 영역', dotted: '점선 따라쓰기', free: '자유 쓰기' };
 const DIFF_LBL = { easy: '쉬움', normal: '보통', hard: '어려움' };
 const TOL = { easy: 48, normal: 32, hard: 20 };
 
@@ -394,13 +390,44 @@ const NUM_STROKES = {
 // ══════════════════════════════════════════════════════════════
 // Interpolate strokes for smoother paths
 // ══════════════════════════════════════════════════════════════
-function interpolateStroke(points, numPts) {
+function catmullRomSpline(points, numPts) {
+    // Generate smooth curve through control points using Catmull-Rom spline
     if (points.length < 2) return points;
-    // Calculate total length
+    if (points.length === 2) {
+        const result = [];
+        for (let i = 0; i <= numPts; i++) {
+            const t = i / numPts;
+            result.push({ x: points[0].x + (points[1].x - points[0].x) * t, y: points[0].y + (points[1].y - points[0].y) * t });
+        }
+        return result;
+    }
+    // Pad with phantom points
+    const pts = [
+        { x: 2 * points[0].x - points[1].x, y: 2 * points[0].y - points[1].y },
+        ...points,
+        { x: 2 * points[points.length-1].x - points[points.length-2].x, y: 2 * points[points.length-1].y - points[points.length-2].y }
+    ];
+    const segments = pts.length - 3;
+    const raw = [];
+    const ptsPerSeg = Math.max(4, Math.ceil(numPts / segments));
+    for (let s = 0; s < segments; s++) {
+        const p0 = pts[s], p1 = pts[s+1], p2 = pts[s+2], p3 = pts[s+3];
+        const steps = (s === segments - 1) ? ptsPerSeg : ptsPerSeg;
+        for (let i = 0; i <= steps; i++) {
+            if (s > 0 && i === 0) continue; // avoid duplicate
+            const t = i / steps;
+            const t2 = t * t, t3 = t2 * t;
+            raw.push({
+                x: 0.5 * ((2*p1.x) + (-p0.x+p2.x)*t + (2*p0.x-5*p1.x+4*p2.x-p3.x)*t2 + (-p0.x+3*p1.x-3*p2.x+p3.x)*t3),
+                y: 0.5 * ((2*p1.y) + (-p0.y+p2.y)*t + (2*p0.y-5*p1.y+4*p2.y-p3.y)*t2 + (-p0.y+3*p1.y-3*p2.y+p3.y)*t3)
+            });
+        }
+    }
+    // Resample to uniform spacing
     let totalLen = 0;
     const segLens = [];
-    for (let i = 1; i < points.length; i++) {
-        const len = Math.hypot(points[i].x - points[i-1].x, points[i].y - points[i-1].y);
+    for (let i = 1; i < raw.length; i++) {
+        const len = Math.hypot(raw[i].x - raw[i-1].x, raw[i].y - raw[i-1].y);
         segLens.push(len);
         totalLen += len;
     }
@@ -411,10 +438,7 @@ function interpolateStroke(points, numPts) {
         for (let s = 0; s < segLens.length; s++) {
             if (cum + segLens[s] >= target || s === segLens.length - 1) {
                 const t = segLens[s] > 0 ? Math.min(1, (target - cum) / segLens[s]) : 0;
-                result.push({
-                    x: points[s].x + (points[s+1].x - points[s].x) * t,
-                    y: points[s].y + (points[s+1].y - points[s].y) * t
-                });
+                result.push({ x: raw[s].x + (raw[s+1].x - raw[s].x) * t, y: raw[s].y + (raw[s+1].y - raw[s].y) * t });
                 break;
             }
             cum += segLens[s];
@@ -429,7 +453,7 @@ function getScaledStrokes(num, w, h) {
     const usableW = w - margin * 2;
     const usableH = h - margin * 2;
     return raw.map(stroke => {
-        const interp = interpolateStroke(stroke, 150);
+        const interp = catmullRomSpline(stroke, 200);
         return interp.map(p => ({
             x: margin + p.x * usableW,
             y: margin + p.y * usableH
@@ -561,36 +585,6 @@ function offsetPath(path, d) {
     });
 }
 
-function renderMarkers(stroke) {
-    const start = stroke[0];
-    const end = stroke[stroke.length - 1];
-    // Start marker
-    ctx.beginPath();
-    ctx.arc(start.x, start.y, 14, 0, Math.PI * 2);
-    ctx.fillStyle = 'rgba(46,127,217,0.18)';
-    ctx.fill();
-    ctx.strokeStyle = 'rgba(46,127,217,0.5)';
-    ctx.lineWidth = 1.5;
-    ctx.stroke();
-    ctx.fillStyle = '#2E7FD9';
-    ctx.font = 'bold 8px "Noto Sans KR", sans-serif';
-    ctx.textAlign = 'center';
-    ctx.textBaseline = 'middle';
-    ctx.fillText('출발', start.x, start.y);
-    // End marker
-    ctx.beginPath();
-    ctx.arc(end.x, end.y, 14, 0, Math.PI * 2);
-    ctx.fillStyle = 'rgba(240,144,30,0.18)';
-    ctx.fill();
-    ctx.strokeStyle = 'rgba(240,144,30,0.5)';
-    ctx.lineWidth = 1.5;
-    ctx.stroke();
-    ctx.fillStyle = '#F0901E';
-    ctx.font = 'bold 8px "Noto Sans KR", sans-serif';
-    ctx.textAlign = 'center';
-    ctx.textBaseline = 'middle';
-    ctx.fillText('도착', end.x, end.y);
-}
 
 // ══════════════════════════════════════════════════════════════
 // Render
@@ -625,13 +619,9 @@ function render() {
         scaledStrokes.forEach(stroke => {
             if (G.mode === 'guide') {
                 renderGuideMode(stroke, tol);
-            } else if (G.mode === 'dots') {
-                renderDotsMode(stroke, tol);
             } else if (G.mode === 'dotted') {
                 renderDottedMode(stroke);
             }
-            // Visual-only start/end markers
-            renderMarkers(stroke);
         });
     }
 
@@ -735,47 +725,31 @@ function renderGuideMode(stroke, tol) {
     ctx.setLineDash([8, 8]);
     ctx.stroke();
     ctx.setLineDash([]);
+
+    // Direction arrows
+    renderDirectionArrows(stroke, 'rgba(91,200,134,.45)');
 }
 
-function renderDotsMode(stroke, tol) {
-    // Draw smooth center guide line (dashed)
-    ctx.beginPath();
-    drawSmoothPath(stroke);
-    ctx.strokeStyle = 'rgba(110,90,70,.35)';
-    ctx.lineWidth = 1.5;
-    ctx.lineCap = 'round';
-    ctx.setLineDash([6, 8]);
-    ctx.stroke();
-    ctx.setLineDash([]);
-
-    // Draw dots along the path
-    const dotCount = 10;
-    const step = Math.floor(stroke.length / (dotCount - 1));
-    for (let i = 0; i < dotCount; i++) {
-        const idx = Math.min(i * step, stroke.length - 1);
+function renderDirectionArrows(stroke, color) {
+    const arrowCount = 4;
+    const arrowStep = Math.floor(stroke.length / (arrowCount + 1));
+    for (let i = 1; i <= arrowCount; i++) {
+        const idx = Math.min(i * arrowStep, stroke.length - 2);
         const p = stroke[idx];
+        const pn = stroke[Math.min(idx + 8, stroke.length - 1)];
+        const angle = Math.atan2(pn.y - p.y, pn.x - p.x);
+        ctx.save();
+        ctx.translate(p.x, p.y);
+        ctx.rotate(angle);
         ctx.beginPath();
-        ctx.arc(p.x, p.y, 5.5, 0, Math.PI * 2);
-        ctx.fillStyle = '#2E7FD9';
+        ctx.moveTo(6, 0);
+        ctx.lineTo(-3, -4);
+        ctx.lineTo(-3, 4);
+        ctx.closePath();
+        ctx.fillStyle = color;
         ctx.fill();
-        ctx.beginPath();
-        ctx.arc(p.x, p.y, 5.5, 0, Math.PI * 2);
-        ctx.strokeStyle = 'white';
-        ctx.lineWidth = 1.5;
-        ctx.stroke();
+        ctx.restore();
     }
-
-    // Draw numbered order on first, middle, last dots
-    const labelDots = [0, Math.floor(dotCount / 2), dotCount - 1];
-    labelDots.forEach((di, idx) => {
-        const pidx = Math.min(di * step, stroke.length - 1);
-        const p = stroke[pidx];
-        ctx.fillStyle = 'white';
-        ctx.font = 'bold 7px "Noto Sans KR", sans-serif';
-        ctx.textAlign = 'center';
-        ctx.textBaseline = 'middle';
-        ctx.fillText(idx + 1, p.x, p.y);
-    });
 }
 
 function renderDottedMode(stroke) {
@@ -790,26 +764,8 @@ function renderDottedMode(stroke) {
     ctx.stroke();
     ctx.setLineDash([]);
 
-    // Direction arrows along the path (smaller, softer)
-    const arrowCount = 4;
-    const arrowStep = Math.floor(stroke.length / (arrowCount + 1));
-    for (let i = 1; i <= arrowCount; i++) {
-        const idx = Math.min(i * arrowStep, stroke.length - 2);
-        const p = stroke[idx];
-        const pn = stroke[Math.min(idx + 8, stroke.length - 1)];
-        const angle = Math.atan2(pn.y - p.y, pn.x - p.x);
-        ctx.save();
-        ctx.translate(p.x, p.y);
-        ctx.rotate(angle);
-        ctx.beginPath();
-        ctx.moveTo(5, 0);
-        ctx.lineTo(-2.5, -3.5);
-        ctx.lineTo(-2.5, 3.5);
-        ctx.closePath();
-        ctx.fillStyle = 'rgba(240,144,30,.4)';
-        ctx.fill();
-        ctx.restore();
-    }
+    // Direction arrows
+    renderDirectionArrows(stroke, 'rgba(240,144,30,.45)');
 }
 
 
