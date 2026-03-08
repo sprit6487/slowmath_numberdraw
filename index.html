@@ -735,7 +735,8 @@ function renderGuideMode(stroke, tol) {
     renderDirectionArrows(stroke, 'rgba(91,200,134,.45)');
 }
 
-function renderDirectionArrows(stroke, color) {
+function renderDirectionArrows(stroke, color, offset) {
+    const off = offset || 0;
     const arrowCount = 4;
     const arrowStep = Math.floor(stroke.length / (arrowCount + 1));
     for (let i = 1; i <= arrowCount; i++) {
@@ -743,8 +744,11 @@ function renderDirectionArrows(stroke, color) {
         const p = stroke[idx];
         const pn = stroke[Math.min(idx + 8, stroke.length - 1)];
         const angle = Math.atan2(pn.y - p.y, pn.x - p.x);
+        // offset perpendicular to stroke direction
+        const nx = -Math.sin(angle) * off;
+        const ny = Math.cos(angle) * off;
         ctx.save();
-        ctx.translate(p.x, p.y);
+        ctx.translate(p.x + nx, p.y + ny);
         ctx.rotate(angle);
         ctx.beginPath();
         ctx.moveTo(6, 0);
@@ -769,8 +773,8 @@ function renderDottedMode(stroke) {
     ctx.stroke();
     ctx.setLineDash([]);
 
-    // Direction arrows
-    renderDirectionArrows(stroke, 'rgba(240,144,30,.45)');
+    // Direction arrows (offset to avoid overlapping dotted line)
+    renderDirectionArrows(stroke, 'rgba(240,144,30,.55)', -12);
 }
 
 
