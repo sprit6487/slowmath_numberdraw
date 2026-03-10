@@ -332,8 +332,8 @@ const NUM_STROKES = {
             {x:0.72,y:0.15},{x:0.78,y:0.22},{x:0.8,y:0.3},
             {x:0.78,y:0.38},{x:0.72,y:0.46},{x:0.64,y:0.54},
             {x:0.54,y:0.62},{x:0.44,y:0.7},{x:0.34,y:0.78},
-            {x:0.24,y:0.86},{x:0.2,y:0.9},
-            {x:0.35,y:0.9},{x:0.5,y:0.9},{x:0.65,y:0.9},{x:0.8,y:0.9}
+            {x:0.24,y:0.86},{x:0.15,y:0.9},
+            {x:0.3,y:0.9},{x:0.45,y:0.9},{x:0.6,y:0.9},{x:0.75,y:0.9},{x:0.88,y:0.9}
         ]
     ],
     3: [
@@ -714,6 +714,23 @@ function offsetPath(path, d) {
     });
 }
 
+// Smooth a path using moving average to remove jitter from offset normals
+function smoothPath(path, iterations) {
+    let pts = path.map(p => ({x: p.x, y: p.y}));
+    for (let iter = 0; iter < (iterations || 3); iter++) {
+        const next = [pts[0]];
+        for (let i = 1; i < pts.length - 1; i++) {
+            next.push({
+                x: pts[i-1].x * 0.25 + pts[i].x * 0.5 + pts[i+1].x * 0.25,
+                y: pts[i-1].y * 0.25 + pts[i].y * 0.5 + pts[i+1].y * 0.25
+            });
+        }
+        next.push(pts[pts.length - 1]);
+        pts = next;
+    }
+    return pts;
+}
+
 
 // ══════════════════════════════════════════════════════════════
 // Render
@@ -755,7 +772,7 @@ function render() {
             ctx.beginPath();
             drawSmoothPath(stroke);
             ctx.strokeStyle = '#5BC886';
-            ctx.lineWidth = 5;
+            ctx.lineWidth = 7;
             ctx.lineCap = 'round';
             ctx.lineJoin = 'round';
             ctx.setLineDash([]);
@@ -768,7 +785,7 @@ function render() {
         ctx.beginPath();
         drawSmoothPath(G.pts);
         ctx.strokeStyle = '#5BC886';
-        ctx.lineWidth = 5;
+        ctx.lineWidth = 7;
         ctx.lineCap = 'round';
         ctx.lineJoin = 'round';
         ctx.setLineDash([]);
@@ -810,9 +827,9 @@ function drawStrokePath(stroke, color, width) {
 }
 
 function renderGuideMode(stroke, tol) {
-    // Draw corridor (guide area) with smooth curves
-    const up = offsetPath(stroke, -tol);
-    const lo = offsetPath(stroke, tol);
+    // Draw corridor (guide area) with smoothed offset paths
+    const up = smoothPath(offsetPath(stroke, -tol), 5);
+    const lo = smoothPath(offsetPath(stroke, tol), 5);
 
     // Fill corridor
     ctx.beginPath();
@@ -1003,7 +1020,7 @@ function saveCurrentDrawing() {
             tmpCtx.beginPath();
             drawSmoothPathOn(tmpCtx, stroke);
             tmpCtx.strokeStyle = '#5BC886';
-            tmpCtx.lineWidth = 5;
+            tmpCtx.lineWidth = 7;
             tmpCtx.lineCap = 'round';
             tmpCtx.lineJoin = 'round';
             tmpCtx.setLineDash([]);
