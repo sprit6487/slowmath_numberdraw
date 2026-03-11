@@ -18,8 +18,8 @@
         .login-logo-area { text-align: center; margin-bottom: 48px; }
         .login-logo-area svg.turtle-logo { width: 120px; height: 100px; }
         .login-logo-area h1 { font-size: 1.875rem; font-weight: 900; letter-spacing: -0.025em; margin: 8px 0 0; color: #4A4035; }
-        .title-blue { color: #2E7FD9; }
-        .title-orange { color: #F0901E; }
+        .title-blue { color: #6BADE8; }
+        .title-orange { color: #F0A050; }
         .login-subtitle { color: #B8AD9E; font-size: .9375rem; margin-top: 4px; }
         .login-buttons { width: 100%; max-width: 320px; display: flex; flex-direction: column; gap: 12px; }
         .login-btn { display: flex; align-items: center; justify-content: center; gap: 10px; width: 100%; padding: 14px 20px; border-radius: 12px; font-size: .9375rem; font-weight: 600; font-family: 'Noto Sans KR', sans-serif; border: none; cursor: pointer; transition: transform .1s; }
@@ -38,13 +38,13 @@
         .logout-btn { background: none; border: 1.5px solid #E8E2DA; border-radius: 8px; padding: 8px 24px; font-size: 0.8rem; font-weight: 600; color: #B8AD9E; cursor: pointer; font-family: 'Noto Sans KR', sans-serif; transition: background 0.15s; }
         .logout-btn:hover { background: #F5F1EB; }
 
-        .sec-label { font-size: .875rem; font-weight: 700; color: #4A4035; margin: 0 0 10px; }
+        .sec-label { font-size: .875rem; font-weight: 700; color: #B8AD9E; margin: 0 0 10px; }
 
         /* ── Mode Selection ── */
         .mode-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 10px; margin-bottom: 18px; }
-        .mode-card { border: 2.5px solid #E8E2DA; border-radius: 16px; padding: 16px 8px 14px; background: white; cursor: pointer; text-align: center; transition: all .15s; }
+        .mode-card { border: 2.5px solid #E8E2DA; border-radius: 20px; padding: 16px 8px 14px; background: white; cursor: pointer; text-align: center; transition: all .15s; }
         .mode-card:active { transform: scale(.95); }
-        .mode-card.sel { border-color: #F0901E; background: #FFF8F0; }
+        .mode-card.sel { border-color: #F0A050; background: #FFF8F0; }
         .mode-card .m-icon { height: 54px; display: flex; align-items: center; justify-content: center; margin-bottom: 8px; font-size: 1.8rem; }
         .mode-card .m-name { font-size: .85rem; font-weight: 700; color: #4A4035; }
 
@@ -52,17 +52,17 @@
         .range-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 8px; margin-bottom: 10px; }
         .range-btn { border: 2.5px solid #E8E2DA; border-radius: 12px; padding: 10px 4px; background: white; cursor: pointer; text-align: center; transition: all .15s; font-size: .85rem; font-weight: 700; color: #4A4035; font-family: 'Noto Sans KR', sans-serif; }
         .range-btn:active { transform: scale(.95); }
-        .range-btn.sel { border-color: #2E7FD9; background: #EEF5FF; color: #2E7FD9; }
+        .range-btn.sel { border-color: #6BADE8; background: #EEF6FD; color: #6BADE8; }
 
         /* ── Number Grid ── */
         .num-grid { display: grid; grid-template-columns: repeat(5,1fr); gap: 8px; margin-bottom: 18px; }
         .num-card { border: 2.5px solid #E8E2DA; border-radius: 14px; padding: 12px 4px; background: white; cursor: pointer; text-align: center; transition: all .15s; font-size: 1.5rem; font-weight: 900; color: #4A4035; }
         .num-card:active { transform: scale(.95); }
-        .num-card.sel { border-color: #2E7FD9; background: #EEF5FF; color: #2E7FD9; }
+        .num-card.sel { border-color: #6BADE8; background: #EEF6FD; color: #6BADE8; }
 
         /* ── Difficulty ── */
 
-        .start-btn { width: 100%; padding: 16px 0; border-radius: 16px; border: none; margin-top: 18px; background: #4A4035; color: white; font-family: 'Noto Sans KR', sans-serif; font-size: 1.1rem; font-weight: 700; cursor: pointer; box-shadow: 0 4px 16px rgba(74,64,53,.25); transition: transform .1s, box-shadow .1s; }
+        .start-btn { width: 100%; padding: 16px 0; border-radius: 16px; border: none; margin-top: 18px; background: #4A4035; color: white; font-family: 'Noto Sans KR', sans-serif; font-size: 1.1rem; font-weight: 700; cursor: pointer; box-shadow: 0 2px 8px rgba(74,64,53,0.15); transition: transform .1s, box-shadow .1s; }
         .start-btn:active { transform: scale(.97); box-shadow: none; }
 
         /* ── Game View ── */
@@ -78,7 +78,7 @@
         .action-btns { display: flex; gap: 10px; width: 100%; max-width: 320px; margin: 0 auto; }
         .btn-retry { flex: 1; padding: 13px 0; border-radius: 12px; border: 2.5px solid #E8E2DA; background: white; font-family: 'Noto Sans KR', sans-serif; font-size: .9rem; font-weight: 700; color: #8C8070; cursor: pointer; transition: transform .1s; }
         .btn-retry:active { transform: scale(.97); }
-        .btn-change { flex: 1.2; padding: 13px 0; border-radius: 12px; border: none; background: #F0901E; font-family: 'Noto Sans KR', sans-serif; font-size: .9rem; font-weight: 700; color: white; cursor: pointer; transition: transform .1s; box-shadow: 0 2px 8px rgba(240,144,30,.3); }
+        .btn-change { flex: 1.2; padding: 13px 0; border-radius: 12px; border: none; background: #F0A050; font-family: 'Noto Sans KR', sans-serif; font-size: .9rem; font-weight: 700; color: white; cursor: pointer; transition: transform .1s; box-shadow: 0 2px 8px rgba(240,144,30,.3); }
         .btn-change:active { transform: scale(.97); box-shadow: none; }
         .res-btns { display: flex; gap: 10px; width: 100%; margin-top: 8px; max-width: 320px; }
 
@@ -87,7 +87,7 @@
         .progress-dots { display: flex; gap: 4px; flex: 1; }
         .progress-dot { flex: 1; height: 6px; border-radius: 3px; background: #E8E2DA; transition: background .2s; }
         .progress-dot.done { background: #5BC886; }
-        .progress-dot.current { background: #F0901E; }
+        .progress-dot.current { background: #F0A050; }
         .progress-label { font-size: .75rem; font-weight: 700; color: #8C8070; white-space: nowrap; }
 
         /* ── Result View ── */
@@ -102,7 +102,7 @@
         .result-actions button { flex: 1; padding: 13px 0; border-radius: 12px; font-family: 'Noto Sans KR', sans-serif; font-size: .9rem; font-weight: 700; cursor: pointer; transition: transform .1s; }
         .result-actions button:active { transform: scale(.97); }
         .btn-home { border: 2.5px solid #E8E2DA; background: white; color: #8C8070; }
-        .btn-again { border: none; background: #F0901E; color: white; box-shadow: 0 2px 8px rgba(240,144,30,.3); }
+        .btn-again { border: none; background: #F0A050; color: white; box-shadow: 0 2px 8px rgba(240,144,30,.3); }
 
         @keyframes popIn { 0%{transform:scale(.7);opacity:0} 60%{transform:scale(1.12);opacity:1} 100%{transform:scale(1);opacity:1} }
         @keyframes fadeUp { from{opacity:0;transform:translateY(8px)} to{opacity:1;transform:translateY(0)} }
@@ -219,7 +219,7 @@
                         <path d="M14 11 C20 5 30 5 37 8 C42 11 43 18 40 23 C38 26 33 28 27 28 C33 28 39 31 41 35" stroke="#5BC886" stroke-width="3" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
                         <!-- pencil tip at stroke end (41,35), angled along writing direction -->
                         <g transform="translate(41 35) rotate(70)">
-                            <rect x="-1.8" y="0" width="3.6" height="14" rx=".8" fill="#F0901E"/>
+                            <rect x="-1.8" y="0" width="3.6" height="14" rx=".8" fill="#F0A050"/>
                             <polygon points="-1.8,0 1.8,0 0,-4" fill="#4A4035"/>
                             <rect x="-1.8" y="11" width="3.6" height="3" rx=".8" fill="#E8E2DA"/>
                         </g>
