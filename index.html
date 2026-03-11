@@ -278,6 +278,9 @@
                 <button class="btn-home" onclick="goHome()">홈으로</button>
                 <button class="btn-again" onclick="startAgain()">다시 연습하기</button>
             </div>
+            <div style="text-align:center; margin-top:12px;">
+                <button onclick="shareApp()" style="background:none; border:2px solid #E8E2DA; border-radius:12px; padding:10px 24px; font-family:'Noto Sans KR',sans-serif; font-size:.85rem; font-weight:600; color:#8C8070; cursor:pointer;">📤 공유하기</button>
+            </div>
         </div>
     </div>
 
@@ -1096,6 +1099,21 @@ function goHome() {
     gameView.classList.add('hidden');
     resultView.classList.add('hidden');
     homeView.classList.remove('hidden');
+}
+
+function shareApp() {
+    const title = document.title;
+    const url = window.location.href;
+    const text = title + ' - 아이와 함께 연습해보세요!';
+    if (navigator.share) {
+        navigator.share({ title: title, text: text, url: url }).catch(function(){});
+    } else {
+        navigator.clipboard.writeText(url).then(function() {
+            alert('링크가 복사되었습니다!');
+        }).catch(function() {
+            prompt('링크를 복사하세요:', url);
+        });
+    }
 }
 </script>
 </body>
