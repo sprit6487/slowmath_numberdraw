@@ -263,7 +263,7 @@
             <div class="instr" id="instr"></div>
             <div class="action-btns">
                 <button class="btn-retry" onclick="retry()">다시 쓰기</button>
-                <button class="btn-change" onclick="nextTurn()">다음 숫자</button>
+                <button class="btn-change" onclick="nextTurn()">다음</button>
             </div>
         </div>
 
@@ -655,7 +655,7 @@ function updateProgress() {
     document.getElementById('progress-label').textContent = (G.turn + 1) + '/' + TOTAL_TURNS;
     // Update button text for last turn
     const btnChange = document.querySelector('.btn-change');
-    btnChange.textContent = (G.turn >= TOTAL_TURNS - 1) ? '결과 확인' : '다음 숫자';
+    btnChange.textContent = (G.turn >= TOTAL_TURNS - 1) ? '결과 확인' : '다음';
 }
 
 document.getElementById('start-btn').addEventListener('click', startGame);
