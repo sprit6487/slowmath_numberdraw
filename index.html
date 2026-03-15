@@ -34,6 +34,21 @@
         .app-header { display: flex; flex-direction: column; align-items: center; text-align: center; margin-bottom: 28px; }
         .app-header svg.turtle-logo { width: 80px; height: 67px; }
         .app-header h1 { font-size: 1.5rem; font-weight: 900; letter-spacing: -0.025em; margin: 8px 0 0; line-height: 1.2; }
+        .setting-divider { border-top: 1.5px solid #F0ECE6; padding-top: 18px; margin-top: 18px; }
+        .setting-header { display: flex; align-items: center; justify-content: space-between; }
+        .setting-title { font-size: 0.875rem; font-weight: 600; color: #4A4035; }
+        .setting-title .badge { font-size: 0.7rem; font-weight: 400; color: #B8AD9E; margin-left: 6px; }
+        .toggle-track {
+            width: 48px; height: 28px; border-radius: 99px; position: relative;
+            background: #E0DAD0; border: none; cursor: pointer; flex-shrink: 0; transition: background 0.2s;
+        }
+        .toggle-track.on { background: #5BC886; }
+        .toggle-knob {
+            width: 22px; height: 22px; border-radius: 50%; background: #fff;
+            position: absolute; top: 3px; left: 3px;
+            box-shadow: 0 1px 4px rgba(0,0,0,0.12); transition: transform 0.2s;
+        }
+        .toggle-track.on .toggle-knob { transform: translateX(20px); }
         .logout-wrap { margin-top: auto; padding-top: 24px; text-align: center; }
         .logout-btn { background: none; border: 1.5px solid #E8E2DA; border-radius: 8px; padding: 8px 24px; font-size: 0.8rem; font-weight: 600; color: #B8AD9E; cursor: pointer; font-family: 'Noto Sans KR', sans-serif; transition: background 0.15s; }
         .logout-btn:hover { background: #F5F1EB; }
@@ -289,6 +304,15 @@
 
             <button class="start-btn" id="start-btn">시작하기</button>
 
+            <div class="setting-divider">
+                <div class="setting-header">
+                    <p class="setting-title">음성 <span class="badge">숫자 읽어주기</span></p>
+                    <button class="toggle-track" id="tts-toggle" onclick="toggleTTS()" role="switch">
+                        <span class="toggle-knob"></span>
+                    </button>
+                </div>
+            </div>
+
             <div class="logout-wrap">
                 <button class="logout-btn" id="logout-btn">로그아웃</button>
             </div>
@@ -334,6 +358,27 @@
     </div>
 
 <script>
+// ══════════════════════════════════════════════════════════════
+// TTS
+// ══════════════════════════════════════════════════════════════
+const TTS_KEY = 'slowmath_numberdraw_tts';
+let ttsEnabled = (() => { try { return JSON.parse(localStorage.getItem(TTS_KEY)) ?? true; } catch { return true; } })();
+function toggleTTS() {
+    ttsEnabled = !ttsEnabled;
+    localStorage.setItem(TTS_KEY, JSON.stringify(ttsEnabled));
+    document.getElementById('tts-toggle').classList.toggle('on', ttsEnabled);
+}
+function speak(text) {
+    if (!ttsEnabled || !window.speechSynthesis) return;
+    window.speechSynthesis.cancel();
+    const u = new SpeechSynthesisUtterance(text);
+    u.lang = 'ko-KR'; u.rate = 0.9;
+    setTimeout(() => window.speechSynthesis.speak(u), 50);
+}
+document.addEventListener('DOMContentLoaded', () => {
+    document.getElementById('tts-toggle').classList.toggle('on', ttsEnabled);
+});
+
 // ══════════════════════════════════════════════════════════════
 // State
 // ══════════════════════════════════════════════════════════════
@@ -684,6 +729,7 @@ function startGame() {
         resetGame();
         updateInstr();
         render();
+        speak('숫자 ' + G.num);
     });
 }
 
@@ -1111,11 +1157,13 @@ function nextTurn() {
     resetGame();
     updateInstr();
     render();
+    speak('숫자 ' + G.num);
 }
 
 function showResults() {
     gameView.classList.add('hidden');
     resultView.classList.remove('hidden');
+    speak('연습 완료! 잘했어요!');
     document.getElementById('result-title').textContent = '연습 완료!';
     document.getElementById('result-subtitle').textContent = G.nums.length === 1
         ? '숫자 ' + G.nums[0] + '을(를) ' + TOTAL_TURNS + '번 써봤어요'
