@@ -924,48 +924,40 @@ function drawStrokePath(stroke, color, width) {
 }
 
 function renderGuideMode(stroke, tol) {
-    // Draw corridor (guide area) with smoothed offset paths
-    const up = smoothPath(offsetPath(stroke, -tol), 5);
-    const lo = smoothPath(offsetPath(stroke, tol), 5);
+    // Draw smooth corridor using canvas thick stroke (eliminates jaggedness from offset path computation)
 
-    // Fill corridor
-    ctx.beginPath();
-    drawSmoothPath(up);
-    const loRev = lo.slice().reverse();
-    ctx.lineTo(loRev[0].x, loRev[0].y);
-    for (let i = 0; i < loRev.length - 1; i++) {
-        const xm = (loRev[i].x + loRev[i+1].x) / 2;
-        const ym = (loRev[i].y + loRev[i+1].y) / 2;
-        if (i === 0) { ctx.lineTo(xm, ym); }
-        else { ctx.quadraticCurveTo(loRev[i].x, loRev[i].y, xm, ym); }
-    }
-    ctx.lineTo(loRev[loRev.length-1].x, loRev[loRev.length-1].y);
-    ctx.closePath();
-    ctx.fillStyle = 'rgba(91,200,134,.08)';
-    ctx.fill();
-
-    // Corridor borders (smooth)
-    [up, lo].forEach(pts => {
-        ctx.beginPath();
-        drawSmoothPath(pts);
-        ctx.strokeStyle = 'rgba(91,200,134,.25)';
-        ctx.lineWidth = 1;
-        ctx.setLineDash([6, 6]);
-        ctx.stroke();
-        ctx.setLineDash([]);
-    });
-
-    // Center guide (smooth, light)
+    // Outer border ring
     ctx.beginPath();
     drawSmoothPath(stroke);
-    ctx.strokeStyle = 'rgba(110,90,70,.12)';
-    ctx.lineWidth = 2;
+    ctx.strokeStyle = 'rgba(91,200,134,.30)';
+    ctx.lineWidth = tol * 2 + 4;
+    ctx.lineCap = 'round';
+    ctx.lineJoin = 'round';
+    ctx.setLineDash([]);
+    ctx.stroke();
+
+    // Inner fill
+    ctx.beginPath();
+    drawSmoothPath(stroke);
+    ctx.strokeStyle = 'rgba(91,200,134,.10)';
+    ctx.lineWidth = tol * 2;
+    ctx.lineCap = 'round';
+    ctx.lineJoin = 'round';
+    ctx.setLineDash([]);
+    ctx.stroke();
+
+    // Center guide (dashed)
+    ctx.beginPath();
+    drawSmoothPath(stroke);
+    ctx.strokeStyle = 'rgba(110,90,70,.15)';
+    ctx.lineWidth = 1.5;
+    ctx.lineCap = 'round';
     ctx.setLineDash([8, 8]);
     ctx.stroke();
     ctx.setLineDash([]);
 
     // Direction arrows
-    renderDirectionArrows(stroke, 'rgba(91,200,134,.45)');
+    renderDirectionArrows(stroke, 'rgba(91,200,134,.55)');
 }
 
 function renderDirectionArrows(stroke, color, offset, count) {
