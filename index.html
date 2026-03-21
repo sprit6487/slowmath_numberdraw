@@ -247,19 +247,19 @@
 <div class="login-buttons">
                 <button class="login-btn kakao" onclick="socialLogin('kakao')">
                     <svg width="20" height="20" viewBox="0 0 20 20"><path d="M10 2C5.03 2 1 5.13 1 8.97c0 2.48 1.64 4.66 4.1 5.88l-.7 3.15 3.56-2.34c.66.1 1.34.15 2.04.15 4.97 0 9-3.13 9-6.97S14.97 2 10 2z" fill="#191919"/></svg>
-                    카카오 로그인
+                    카카오로 시작하기
                 </button>
                 <button class="login-btn naver" onclick="socialLogin('naver')">
                     <svg width="20" height="20" viewBox="0 0 20 20"><path d="M13.36 10.57L6.4 2H2v16h4.64V9.43L13.6 18H18V2h-4.64z" fill="white"/></svg>
-                    네이버 로그인
+                    네이버로 시작하기
                 </button>
                 <button class="login-btn google" onclick="socialLogin('google')">
                     <svg width="20" height="20" viewBox="0 0 20 20"><path d="M19.6 10.23c0-.68-.06-1.36-.17-2.01H10v3.8h5.38a4.6 4.6 0 01-2 3.02v2.5h3.24c1.89-1.74 2.98-4.3 2.98-7.31z" fill="#4285F4"/><path d="M10 20c2.7 0 4.96-.9 6.62-2.43l-3.24-2.5c-.9.6-2.04.95-3.38.95-2.6 0-4.8-1.76-5.58-4.12H1.08v2.58A10 10 0 0010 20z" fill="#34A853"/><path d="M4.42 11.9A6.01 6.01 0 014.1 10c0-.66.12-1.3.32-1.9V5.52H1.08A10 10 0 000 10c0 1.6.39 3.12 1.08 4.48l3.34-2.58z" fill="#FBBC05"/><path d="M10 3.96c1.47 0 2.78.5 3.81 1.5l2.85-2.85A9.97 9.97 0 0010 0 10 10 0 001.08 5.52l3.34 2.58C5.2 5.72 7.4 3.96 10 3.96z" fill="#EA4335"/></svg>
-                    Google 로그인
+                    Google로 시작하기
                 </button>
                 <button class="login-btn facebook" onclick="socialLogin('facebook')">
                     <svg width="20" height="20" viewBox="0 0 20 20"><path d="M18.9 0H1.1C.49 0 0 .49 0 1.1v17.8c0 .61.49 1.1 1.1 1.1h9.58v-7.75H8.08v-3.02h2.6V7.07c0-2.58 1.58-3.99 3.88-3.99 1.1 0 2.05.08 2.33.12v2.7h-1.6c-1.25 0-1.5.6-1.5 1.47v1.93h3l-.39 3.02h-2.61V20h5.12c.6 0 1.1-.49 1.1-1.1V1.1C20 .49 19.51 0 18.9 0z" fill="white"/></svg>
-                    Facebook 로그인
+                    Facebook으로 시작하기
                 </button>
             </div>
         </div>
@@ -691,6 +691,7 @@ function getScaledStrokes(num, w, h) {
 // Social login (stub)
 // ══════════════════════════════════════════════════════════════
 function socialLogin(provider) {
+    localStorage.setItem(\'slowmath_numberdraw_login\', provider);
     document.getElementById('login-view').classList.add('hidden');
     document.getElementById('home-view').classList.remove('hidden');
 }
@@ -752,6 +753,11 @@ document.getElementById('mode-grid').addEventListener('click', e => {
 
 // Start
 function startGame() {
+    if (!localStorage.getItem('slowmath_numberdraw_login')) {
+    document.getElementById('login-view').classList.remove('hidden');
+    document.getElementById('home-view').classList.add('hidden');
+    return;
+}
     homeView.classList.add('hidden');
     resultView.classList.add('hidden');
     gameView.classList.remove('hidden');
@@ -1240,6 +1246,10 @@ function shareApp() {
         });
     }
 }
+
+// ─── 초기 뷰: 항상 메인 화면 표시 ───
+document.getElementById('login-view').classList.add('hidden');
+document.getElementById('home-view').classList.remove('hidden');
 
 // ─── Splash Screen (3초 후 페이드아웃) ───
 setTimeout(function() {
