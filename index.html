@@ -146,8 +146,11 @@
 
         /* ── Result View ── */
         .result-header { text-align: center; margin-bottom: 20px; }
+        .result-header .complete-emoji { font-size: 56px; display: block; margin-bottom: 6px; }
         .result-header h2 { font-size: 1.25rem; font-weight: 900; color: #4A4035; margin: 0 0 4px; }
         .result-header p { font-size: .85rem; color: #B8AD9E; margin: 0; }
+        .next-btn { margin-top: 8px; padding: 14px 36px; border: none; border-radius: 12px; background: #6BADE8; color: #fff; font-size: 1rem; font-weight: 700; cursor: pointer; font-family: inherit; transition: transform 0.12s; }
+        .next-btn:active { transform: scale(0.96); }
         .result-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; margin-bottom: 24px; }
         .result-cell { border: 2px solid #E8E2DA; border-radius: 12px; overflow: hidden; background: #FAFAF8; position: relative; }
         .result-cell img { width: 100%; display: block; }
@@ -386,13 +389,14 @@
         <!-- Result View -->
         <div id="result-view" class="hidden">
             <div class="result-header">
+                <span class="complete-emoji">🏆</span>
                 <h2 id="result-title">연습 완료!</h2>
                 <p id="result-subtitle">10개의 숫자를 모두 써봤어요</p>
             </div>
             <div class="result-grid" id="result-grid"></div>
             <div class="result-actions">
-                <button class="btn-home" onclick="goHome()">홈으로</button>
-                <button class="btn-again" onclick="startAgain()">다시 연습하기</button>
+                <button class="next-btn" onclick="startAgain()">다시 하기</button>
+                <button class="next-btn" onclick="goHome()" style="background:#EDE8E0;color:#8C8070;">홈으로</button>
             </div>
         </div>
     </div>
