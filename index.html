@@ -696,6 +696,7 @@ function getScaledStrokes(num, w, h) {
 // ══════════════════════════════════════════════════════════════
 function socialLogin(provider) {
     localStorage.setItem('slowmath_numberdraw_login', provider);
+    const _sp=sessionStorage.getItem('_sp');if(_sp){sessionStorage.removeItem('_sp');startGame(...JSON.parse(_sp));return;}
     document.getElementById('login-view').classList.add('hidden');
     document.getElementById('home-view').classList.remove('hidden');
 }
@@ -758,6 +759,7 @@ document.getElementById('mode-grid').addEventListener('click', e => {
 // Start
 function startGame() {
     if (!localStorage.getItem('slowmath_numberdraw_login')) {
+    sessionStorage.setItem('_sp',JSON.stringify([]));
     document.getElementById('login-view').classList.remove('hidden');
     document.getElementById('home-view').classList.add('hidden');
     return;
