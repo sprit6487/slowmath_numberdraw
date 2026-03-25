@@ -357,7 +357,7 @@
             </div>
 
             <div class="logout-wrap">
-                <button class="logout-btn" id="logout-btn">로그아웃</button>
+                <button class="logout-btn" id="logout-btn" style="display:none">로그아웃</button>
             </div>
         </div>
 
@@ -699,6 +699,7 @@ function socialLogin(provider) {
     const _sp=sessionStorage.getItem('_sp');if(_sp){sessionStorage.removeItem('_sp');startGame(...JSON.parse(_sp));return;}
     document.getElementById('login-view').classList.add('hidden');
     document.getElementById('home-view').classList.remove('hidden');
+    document.querySelector('.logout-btn').style.display=localStorage.getItem('slowmath_numberdraw_login')?'':'none';
 }
 
 // ══════════════════════════════════════════════════════════════
@@ -814,6 +815,7 @@ document.getElementById('start-btn').addEventListener('click', startGame);
 document.getElementById('btn-back').addEventListener('click', () => {
     gameView.classList.add('hidden');
     homeView.classList.remove('hidden');
+    document.querySelector('.logout-btn').style.display=localStorage.getItem('slowmath_numberdraw_login')?'':'none';
 });
 
 // Logout
@@ -1237,6 +1239,7 @@ function goHome() {
     gameView.classList.add('hidden');
     resultView.classList.add('hidden');
     homeView.classList.remove('hidden');
+    document.querySelector('.logout-btn').style.display=localStorage.getItem('slowmath_numberdraw_login')?'':'none';
 }
 
 function shareApp() {
@@ -1257,6 +1260,7 @@ function shareApp() {
 // ─── 초기 뷰: 항상 메인 화면 표시 ───
 document.getElementById('login-view').classList.add('hidden');
 document.getElementById('home-view').classList.remove('hidden');
+document.querySelector('.logout-btn').style.display=localStorage.getItem('slowmath_numberdraw_login')?'':'none';
 
 // ─── Splash Screen (3초 후 페이드아웃) ───
 setTimeout(function() {
