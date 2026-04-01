@@ -123,6 +123,8 @@
         .app-header svg.turtle-logo { width: 90px; height: 75px; }
         .app-header h1 { font-size: 1.6rem; font-weight: 900; letter-spacing: -0.025em; margin: 8px 0 0; line-height: 1.2; }
         .brand-sub{font-size:.8rem;color:#B8AD9E;margin-top:6px;margin-bottom:0;font-weight:500;}
+        .title-blue { color: #6BADE8; }
+        .title-orange { color: #F0A050; }
         .setting-divider { border-top: 1.5px solid #F0ECE6; padding-top: 18px; margin-top: 18px; }
         .setting-header { display: flex; align-items: center; justify-content: space-between; }
         .setting-title { font-size: 0.875rem; font-weight: 600; color: #4A4035; }
@@ -322,10 +324,6 @@ setTimeout(function() {
                 Facebook으로 시작하기
             </button>
         </div>
-        <div style="margin-top: 32px; text-align: center;">
-            <p id="share-bubble" style="color: #B8AD9E; font-size: 0.85rem; margin: 0; line-height: 1.5;">지금 지인에게 공유하시면<br>하루 무료 이용권을 드려요</p>
-            <button style="margin-top: 12px; padding: 8px 20px; border: 1.5px solid #4A4035; background: none; border-radius: 8px; color: #4A4035; font-weight: 600; cursor: pointer; font-family: inherit;" onclick="shareApp()">공유하기</button>
-        </div>
     </div>
 
         <!-- Home View -->
@@ -415,10 +413,6 @@ setTimeout(function() {
             </div>
 
             <div class="logout-wrap">
-        <div style="margin-top: 24px; text-align: center;">
-            <p style="color: #B8AD9E; font-size: 0.85rem; margin: 0 0 12px; line-height: 1.5;">지금 지인에게 공유하시면<br>하루 무료 이용권을 드려요</p>
-            <button style="padding: 8px 20px; border: 1.5px solid #4A4035; background: none; border-radius: 8px; color: #4A4035; font-weight: 600; cursor: pointer; font-family: inherit;" onclick="shareApp()">공유하기</button>
-        </div>
                 <button class="logout-btn" id="logout-btn" style="display:none">로그아웃</button>
             </div>
         </div>
@@ -758,7 +752,7 @@ function getScaledStrokes(num, w, h) {
 // ══════════════════════════════════════════════════════════════
 function socialLogin(provider) {
     localStorage.setItem('slowmath_numberdraw_login', provider);
-    const _sp=sessionStorage.getItem('_sp');if(_sp){sessionStorage.removeItem('_sp');startGame(...JSON.parse(_sp));return;}
+    const _sp=sessionStorage.getItem('_sp');if(_sp){sessionStorage.removeItem('_sp');document.getElementById('login-view').classList.add('hidden');startGame(...JSON.parse(_sp));return;}
     document.getElementById('login-view').classList.add('hidden');
     document.getElementById('home-view').classList.remove('hidden');
     document.querySelector('.logout-btn').style.display=localStorage.getItem('slowmath_numberdraw_login')?'':'none';
