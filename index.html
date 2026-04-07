@@ -265,13 +265,34 @@
             border: 2px solid #F5DFA0;
             border-radius: 16px;
             padding: 14px 18px;
-            margin-bottom: 20px;
+            margin-bottom: 10px;
             text-align: center;
             font-size: 0.95rem;
             font-weight: 700;
             color: #7B6545;
-            line-height: 1.6;
+            line-height: 1.8;
             animation: fadeUp .4s ease-out;
+        }
+        /* ── Writing Feedback ── */
+        .writing-feedback {
+            background: #F0F6FF;
+            border: 2px solid #BDD5F5;
+            border-radius: 16px;
+            padding: 12px 18px;
+            margin-bottom: 20px;
+            text-align: center;
+            font-size: 0.88rem;
+            font-weight: 600;
+            color: #3A5A8C;
+            line-height: 1.7;
+            animation: fadeUp .5s ease-out;
+        }
+        .writing-feedback .feedback-label {
+            font-size: 0.75rem;
+            font-weight: 700;
+            color: #6A8FBF;
+            letter-spacing: 0.04em;
+            margin-bottom: 4px;
         }
     
     /* ── Splash Screen ── */
@@ -519,6 +540,7 @@ setTimeout(function() {
             <div class="result-grid" id="result-grid"></div>
 
             <div class="encourage-msg" id="encourage-msg"></div>
+            <div class="writing-feedback" id="writing-feedback"></div>
 
             <div class="result-actions">
                 <button class="next-btn" onclick="startAgain()">다시 하기</button>
@@ -1313,7 +1335,7 @@ function drawSmoothPathOn(c, points) {
 function nextTurn() {
     // Save current drawing
     const dataURL = saveCurrentDrawing();
-    G.history.push({ num: G.num, dataURL: dataURL });
+    G.history.push({ num: G.num, dataURL: dataURL, strokes: G.strokes.map(s => s.map(p => ({x: p.x, y: p.y}))) });
     G.turn++;
 
     if (G.turn >= TOTAL_TURNS) {
@@ -1331,6 +1353,94 @@ function nextTurn() {
     updateInstr();
     render();
     speak('숫자 ' + G.num);
+}
+
+// ── Writing Analysis ──
+function analyzeWriting(history, canvasW, canvasH) {
+    if (!history || history.length === 0) return null;
+
+    let totalShakiness = 0, shakyCount = 0;
+    let totalBBoxRatioW = 0, totalBBoxRatioH = 0, bboxCount = 0;
+    let extraStrokeTurns = 0;
+    let veryShortStrokeTurns = 0;
+
+    history.forEach(item => {
+        const strokes = item.strokes || [];
+        if (strokes.length === 0) return;
+
+        // 떨림(shakiness): 각 점이 전후 점의 중간에서 얼마나 벗어나는지
+        let turnShakiness = 0, turnPts = 0;
+        strokes.forEach(pts => {
+            if (pts.length < 3) return;
+            for (let i = 1; i < pts.length - 1; i++) {
+                const ex = (pts[i-1].x + pts[i+1].x) / 2;
+                const ey = (pts[i-1].y + pts[i+1].y) / 2;
+                turnShakiness += Math.hypot(pts[i].x - ex, pts[i].y - ey);
+                turnPts++;
+            }
+        });
+        if (turnPts > 0) {
+            totalShakiness += turnShakiness / turnPts;
+            shakyCount++;
+        }
+
+        // 크기(bounding box)
+        const allPts = strokes.flat();
+        if (allPts.length > 1) {
+            const xs = allPts.map(p => p.x), ys = allPts.map(p => p.y);
+            totalBBoxRatioW += (Math.max(...xs) - Math.min(...xs)) / canvasW;
+            totalBBoxRatioH += (Math.max(...ys) - Math.min(...ys)) / canvasH;
+            bboxCount++;
+        }
+
+        // 획 수: 기대보다 2배 이상 많이 떼면 이슈
+        const expected = (NUM_STROKES[item.num] || []).length;
+        if (expected > 0 && strokes.length > expected * 2) extraStrokeTurns++;
+
+        // 획이 너무 짧으면(조심스럽게 씀)
+        const totalLen = strokes.flat().reduce((acc, _, i, arr) => {
+            if (i === 0) return 0;
+            return acc + Math.hypot(arr[i].x - arr[i-1].x, arr[i].y - arr[i-1].y);
+        }, 0);
+        if (totalLen < canvasW * 0.3) veryShortStrokeTurns++;
+    });
+
+    const avgShakiness = shakyCount > 0 ? totalShakiness / shakyCount : 0;
+    const avgBBoxW = bboxCount > 0 ? totalBBoxRatioW / bboxCount : 0;
+    const avgBBoxH = bboxCount > 0 ? totalBBoxRatioH / bboxCount : 0;
+    const extraRate = extraStrokeTurns / history.length;
+    const shortRate = veryShortStrokeTurns / history.length;
+
+    const lines = [];
+
+    // 떨림/힘 조절
+    if (avgShakiness > 5) {
+        lines.push('선이 많이 떨려요. 연필을 너무 꽉 쥐고 있는 건 아닐까요? 손에 힘을 빼고 편하게 잡아보세요.');
+    } else if (avgShakiness > 2.5) {
+        lines.push('선이 조금 흔들려요. 팔꿈치를 책상에 살짝 올려놓고 천천히 써보세요.');
+    } else if (avgShakiness < 0.8 && avgShakiness >= 0) {
+        lines.push('선이 안정적으로 잘 그어졌어요! 자세와 힘 조절이 좋아요.');
+    }
+
+    // 크기
+    if (avgBBoxW < 0.2 || avgBBoxH < 0.2) {
+        lines.push('숫자를 더 크게 써보세요. 공간을 넓게 활용하면 더 보기 좋아요.');
+    } else if (avgBBoxW > 0.85 && avgBBoxH > 0.85) {
+        lines.push('공간을 꽉 채워서 크고 시원하게 썼어요!');
+    }
+
+    // 획을 자주 떼는 경우
+    if (extraRate > 0.4) {
+        lines.push('획을 자주 끊고 있어요. 가능하면 이어서 한 번에 쓰는 연습을 해보세요.');
+    }
+
+    // 너무 짧게/조심스럽게 쓰는 경우
+    if (shortRate > 0.5 && lines.length < 2) {
+        lines.push('너무 조심스럽게 쓰는 것 같아요. 좀 더 자신 있게, 힘을 줘서 써보세요.');
+    }
+
+    if (lines.length === 0) return '균형 잡힌 글씨예요! 자세와 힘 조절 모두 잘 하고 있어요.';
+    return lines.slice(0, 2).join('<br>');
 }
 
 function showResults() {
@@ -1357,19 +1467,30 @@ _smGameCompleted=true;
         grid.appendChild(cell);
     });
 
-    // ── Encouragement message ──
+    // ── Encouragement message (2줄) ──
     const MSGS = G.nums.length === 1
         ? [
-            '숫자 ' + G.nums[0] + '을(를) ' + TOTAL_TURNS + '번이나 써봤어요! 정말 열심히 했어요! 👏',
-            '반복해서 쓰다 보면 점점 더 잘 써지게 될 거예요! 조금만 더 연습해봐요! 💪',
-            '꾸준히 연습하는 게 최고예요! 오늘도 수고했어요! 🌟'
+            ['숫자 ' + G.nums[0] + '을(를) ' + TOTAL_TURNS + '번이나 써봤어요! 정말 열심히 했어요! 👏', '반복해서 쓰면 쓸수록 점점 더 잘 써지게 될 거예요! 💪'],
+            ['꾸준히 연습하는 게 최고예요! 오늘도 정말 수고했어요! 🌟', '조금만 더 하면 훨씬 자신 있게 쓸 수 있을 거예요! 😊'],
+            ['오늘도 열심히 써줬어요! 참 잘했어요! 🎉', '매일 조금씩 연습하면 글씨가 쑥쑥 늘어요! ✏️']
           ]
         : [
-            TOTAL_TURNS + '개의 숫자를 모두 써봤어요! 정말 대단해요! 👏',
-            '여러 숫자를 차례로 써봤어요! 연습하면 할수록 더 잘 쓸 수 있어요! 💪',
-            '끝까지 잘 해냈어요! 오늘 정말 멋지게 썼어요! 🌟'
+            [TOTAL_TURNS + '개의 숫자를 모두 써봤어요! 정말 대단해요! 👏', '여러 숫자를 차례로 쓰다니 대단한걸요! 🌟'],
+            ['끝까지 잘 해냈어요! 오늘 정말 멋지게 썼어요! 🎉', '연습하면 할수록 더 잘 쓸 수 있어요! 계속 도전해봐요! 💪'],
+            ['모든 숫자를 다 써봤어요! 정말 훌륭해요! 😊', '꾸준히 하는 게 최고의 비결이에요! ✏️']
           ];
-    document.getElementById('encourage-msg').textContent = MSGS[Math.floor(Math.random() * MSGS.length)];
+    const picked = MSGS[Math.floor(Math.random() * MSGS.length)];
+    document.getElementById('encourage-msg').innerHTML = picked[0] + '<br>' + picked[1];
+
+    // ── Writing feedback (스트로크 분석) ──
+    const feedback = analyzeWriting(G.history, LW, LH);
+    const fbEl = document.getElementById('writing-feedback');
+    if (feedback) {
+        fbEl.innerHTML = '<div class="feedback-label">✏️ 쓰기 피드백</div>' + feedback;
+        fbEl.style.display = '';
+    } else {
+        fbEl.style.display = 'none';
+    }
 }
 
 function startAgain() {
