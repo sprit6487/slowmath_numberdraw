@@ -258,6 +258,21 @@
         @keyframes fadeUp { from{opacity:0;transform:translateY(8px)} to{opacity:1;transform:translateY(0)} }
         .pop-in { animation: popIn .35s ease-out; }
         .fade-up { animation: fadeUp .3s ease-out; }
+
+        /* ── Encouragement Message ── */
+        .encourage-msg {
+            background: #FFF8F0;
+            border: 2px solid #F5DFA0;
+            border-radius: 16px;
+            padding: 14px 18px;
+            margin-bottom: 20px;
+            text-align: center;
+            font-size: 0.95rem;
+            font-weight: 700;
+            color: #7B6545;
+            line-height: 1.6;
+            animation: fadeUp .4s ease-out;
+        }
     
     /* ── Splash Screen ── */
     .splash-overlay {
@@ -502,6 +517,9 @@ setTimeout(function() {
                 <p id="result-subtitle">10개의 숫자를 모두 써봤어요</p>
             </div>
             <div class="result-grid" id="result-grid"></div>
+
+            <div class="encourage-msg" id="encourage-msg"></div>
+
             <div class="result-actions">
                 <button class="next-btn" onclick="startAgain()">다시 하기</button>
                 <button class="next-btn" onclick="goHome()" style="background:#EDE8E0;color:#8C8070;">홈으로</button>
@@ -1338,6 +1356,20 @@ _smGameCompleted=true;
         cell.appendChild(img);
         grid.appendChild(cell);
     });
+
+    // ── Encouragement message ──
+    const MSGS = G.nums.length === 1
+        ? [
+            '숫자 ' + G.nums[0] + '을(를) ' + TOTAL_TURNS + '번이나 써봤어요! 정말 열심히 했어요! 👏',
+            '반복해서 쓰다 보면 점점 더 잘 써지게 될 거예요! 조금만 더 연습해봐요! 💪',
+            '꾸준히 연습하는 게 최고예요! 오늘도 수고했어요! 🌟'
+          ]
+        : [
+            TOTAL_TURNS + '개의 숫자를 모두 써봤어요! 정말 대단해요! 👏',
+            '여러 숫자를 차례로 써봤어요! 연습하면 할수록 더 잘 쓸 수 있어요! 💪',
+            '끝까지 잘 해냈어요! 오늘 정말 멋지게 썼어요! 🌟'
+          ];
+    document.getElementById('encourage-msg').textContent = MSGS[Math.floor(Math.random() * MSGS.length)];
 }
 
 function startAgain() {
