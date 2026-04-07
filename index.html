@@ -280,7 +280,7 @@
             border-radius: 16px;
             padding: 12px 18px;
             margin-bottom: 20px;
-            text-align: center;
+            text-align: left;
             font-size: 0.88rem;
             font-weight: 600;
             color: #3A5A8C;
@@ -293,6 +293,7 @@
             color: #6A8FBF;
             letter-spacing: 0.04em;
             margin-bottom: 4px;
+            text-align: center;
         }
     
     /* ── Splash Screen ── */
@@ -1414,7 +1415,8 @@ function analyzeWriting(history, canvasW, canvasH) {
 
     // 떨림/힘 조절
     if (avgShakiness > 5) {
-        lines.push('선이 많이 떨려요. 연필을 너무 꽉 쥐고 있는 건 아닐까요? 손에 힘을 빼고 편하게 잡아보세요.');
+        lines.push('선이 많이 떨려요. 연필을 너무 꽉 쥐고 있는 건 아닐까요?');
+        lines.push('손에 힘을 빼고 편하게 잡아보세요.');
     } else if (avgShakiness > 2.5) {
         lines.push('선이 조금 흔들려요. 팔꿈치를 책상에 살짝 올려놓고 천천히 써보세요.');
     } else if (avgShakiness < 0.8 && avgShakiness >= 0) {
@@ -1423,7 +1425,8 @@ function analyzeWriting(history, canvasW, canvasH) {
 
     // 크기
     if (avgBBoxW < 0.2 || avgBBoxH < 0.2) {
-        lines.push('숫자를 더 크게 써보세요. 공간을 넓게 활용하면 더 보기 좋아요.');
+        lines.push('숫자를 더 크게 써보세요.');
+        lines.push('공간을 넓게 활용하면 더 보기 좋아요.');
     } else if (avgBBoxW > 0.85 && avgBBoxH > 0.85) {
         lines.push('공간을 꽉 채워서 크고 시원하게 썼어요!');
     }
