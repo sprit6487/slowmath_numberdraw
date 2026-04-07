@@ -539,7 +539,6 @@ setTimeout(function() {
             </div>
             <div class="result-grid" id="result-grid"></div>
 
-            <div class="encourage-msg" id="encourage-msg"></div>
             <div class="writing-feedback" id="writing-feedback"></div>
 
             <div class="result-actions">
@@ -1466,21 +1465,6 @@ _smGameCompleted=true;
         cell.appendChild(img);
         grid.appendChild(cell);
     });
-
-    // ── Encouragement message (2줄) ──
-    const MSGS = G.nums.length === 1
-        ? [
-            ['숫자 ' + G.nums[0] + '을(를) ' + TOTAL_TURNS + '번이나 써봤어요! 정말 열심히 했어요! 👏', '반복해서 쓰면 쓸수록 점점 더 잘 써지게 될 거예요! 💪'],
-            ['꾸준히 연습하는 게 최고예요! 오늘도 정말 수고했어요! 🌟', '조금만 더 하면 훨씬 자신 있게 쓸 수 있을 거예요! 😊'],
-            ['오늘도 열심히 써줬어요! 참 잘했어요! 🎉', '매일 조금씩 연습하면 글씨가 쑥쑥 늘어요! ✏️']
-          ]
-        : [
-            [TOTAL_TURNS + '개의 숫자를 모두 써봤어요! 정말 대단해요! 👏', '여러 숫자를 차례로 쓰다니 대단한걸요! 🌟'],
-            ['끝까지 잘 해냈어요! 오늘 정말 멋지게 썼어요! 🎉', '연습하면 할수록 더 잘 쓸 수 있어요! 계속 도전해봐요! 💪'],
-            ['모든 숫자를 다 써봤어요! 정말 훌륭해요! 😊', '꾸준히 하는 게 최고의 비결이에요! ✏️']
-          ];
-    const picked = MSGS[Math.floor(Math.random() * MSGS.length)];
-    document.getElementById('encourage-msg').innerHTML = picked[0] + '<br>' + picked[1];
 
     // ── Writing feedback (스트로크 분석) ──
     const feedback = analyzeWriting(G.history, LW, LH);
