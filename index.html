@@ -969,8 +969,8 @@ document.getElementById('btn-back').addEventListener('click', () => {
 // Logout
 document.getElementById('logout-btn').addEventListener('click', () => {
     localStorage.removeItem('slowmath_numberdraw_login');
-    homeView.classList.add('hidden');
-    document.getElementById('login-view').classList.remove('hidden');
+    document.getElementById('login-view').classList.add('hidden');
+    homeView.classList.remove('hidden');
 });
 
 // ══════════════════════════════════════════════════════════════
